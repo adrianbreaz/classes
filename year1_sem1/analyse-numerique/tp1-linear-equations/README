@@ -1,0 +1,46 @@
+Toutes les fonctions et les scripts sont écrits en OCTAVE. Vous pouvez trouver
+les descriptions de fonction dans chaque fichier. J'ai ajouté deux fonctions
+(UnitTest et DisplayResults) à exercice 5 pour éviter la duplication de code.
+
+Aussi, je suis désolé mais tous les commentaires sont en anglais. Je suis habitué
+à les écrire comme ça et je n'ai pas réalisé, que à la fin.
+
+Question 1:
+    MatAlea.m
+    MatAleaDiag.m
+    MatAleaTriInf.m
+    MatAleaSym.m
+    MatAleaTri.m
+    MatAleaSymDefPos.m
+    MatAleaTriSymDefPos.m
+
+Question 2:
+    MatSplit.m
+    RSLJacobi.m
+    RSLGaussSeidel.m
+    RSLRelaxation.m
+    RSLRichardson.m
+
+Question 3:
+    RSLDiag.m
+    ResTriInf.m
+    ResTriSup.m
+
+Question 4:
+    RSLJacobiVec.m
+    RSLGaussSeidelVec.m
+    RSLRelaxationVec.m
+    RSLRichardsonVec.m
+
+Question 5:
+    TestSDP.m
+    TestTSDP.m
+    UnitTest.m
+    DisplayResults.m
+
+Question 6:
+    GraphOmegaIterations.m
+
+Question 7:
+    TSDPOmegaOptimale.m
+    TSDPRelaxationComparison.m

@@ -1,0 +1,4 @@
+set grid
+f(x) = exp(-x*x/0.1)
+set xrange[-1:1]
+plot f(x),"input.dat"

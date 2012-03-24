@@ -1,0 +1,23 @@
+Algorithms class.
+
+Highlights:
+    - finally coded that silly fft algorithm. brutally simplified but it works.
+    - also the matrix multiplication. seems to work.
+    - really boring mostly. courses completely copied and translated from:
+        http://www.cs.princeton.edu/~wayne/kleinberg-tardos/
+
+Contents
+*. TP1
+    - mergesort
+    - number of inversions in an array
+
+*. TP2
+    - quicksort in python + ruby.
+    - one of them could be the 3 way partitioning variant
+
+*. TP3
+    - heapsort
+
+*. TP4
+    - graph methods: connected components, euclidian path, some more.
+    - small graph class in ruby. experiment

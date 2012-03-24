@@ -1,0 +1,53 @@
+# bad folders
+###################
+.obj
+.moc
+.bzr
+.svn
+.hg
+build
+__pychache__
+
+# binary stuff
+####################
+*.pyc
+*.pyo
+*.o
+*.so
+*.pdf
+*.mat
+*.exe
+*.gch
+octave-core
+
+# generated files
+###################
+sip*
+lib*
+
+
+# logs and temps
+###################
+*~
+*[.-]swp
+*.nav
+*.snm
+*.toc
+*.log
+*.out
+*.aux
+*.swp.*.py
+*.old
+*.backup
+*.tmp*
+*.bak
+*.sbf
+*.exp
+*.plt
+
+# packages
+##################
+*.zip
+*.gz
+*.7z
+*.tgz
