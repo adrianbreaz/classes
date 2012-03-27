@@ -20,7 +20,7 @@ lambda = 600;
 %       | y'(t) = - \lambda * y(t) + 1 - \lambda * t)             (1)
 %       | y(0) = 1
 % thus we have the following functions:
-f = @(t, y) -lambda * y + 1 - lambda * t;       % f(t, y(t))
+f = @(t, y) -lambda * y + 1 + lambda * t;       % f(t, y(t))
 df = @(t, y) -lambda;                           % f'(t, y(t))
 y = @(t) exp(-lambda * t) + t;                  % real solution for (1)
 

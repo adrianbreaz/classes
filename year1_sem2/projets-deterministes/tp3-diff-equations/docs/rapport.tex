@@ -1,0 +1,222 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{multirow}
+
+\usepackage{common-formatting}
+\usepackage{common-math}
+
+%opening
+\title{TP4 - Projets déterministes - MACS1}
+\author{Alexandru Fikl}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+On considère l'équation différentielle suivante:
+\begin{equation}\label{eq:eqdiff}
+\left\{
+\begin{array}{ll}
+    y'(t) = f(t, y(t)), & \quad 0 \leq t \leq T \\
+    y(0) = y_0 &
+\end{array}
+\right.
+\end{equation}
+où $f: [0, T] \times \field{R}^d \to \field{R}^d$ est régulière et $y_0 \in
+\field{R}^d$. Remarquons que l'on a en fait un système d'équations différentielles.
+Pour approximer numériquement la solution de ce système nous allons implémenter
+différentes méthodes. Notons $h$ le pas de la subdivision uniforme $(t_n)_{n = 0}^N$
+de l'intervale $[0, T]$. Donc on a $t_n = nh$. Notons $y_n$ une approximation de
+$y(t_n)$ pour $n \in \{0, 1, \dots, N\}$.
+
+\section{La méthode d'Euler}
+\subsection{Euler Explicite}
+
+La méthode d'Euler Explicite s'écrit:
+\begin{equation}\label{eq:eulerex}
+    y_{n + 1} = y_n + h f(t_n, y_n).
+\end{equation}
+
+\begin{enumerate}
+    \item \emph{Retrouver, par un raisonnement formel, comment ce schéma a été
+    obtenu.}
+
+    On utilisant la méthode des différences finies nous obtenons une approximation de
+    la derivée premier:
+\[
+    y(t_n + h) = y(t_n) + hy'(t_n).
+\]
+    En remplaçant $y'(t_n)$ avec $f(t_n, y(t_n))$ et $y(t_n)$ avec sa approximation,
+    nous avons exactement \eqref{eq:eulerex}.
+
+    \item \emph{Implémenter cette méthode.}
+
+    Voir le fichier \emph{ForwardEuler.m} pour le code MATLAB.
+
+    \item \emph{Faire quelques cas tests sur des exemples simples. Remarquer qu'il se
+    pose des problèmes lorsque le pas $h$ devient trop grand.}
+
+    Voir le fichier \emph{test\_methods.m}.
+    \item \emph{Tracer les courbes d’erreur de la méthode en échelle log-log et
+    déterminer l'ordre de cette méthode: on tracera $\log(e(h)) = \log(\norm{y_h -
+    y}{})$ en fonction de $\log(h)$ où $y_h$ désigne la solution approchée sur
+    $[0, T]$ pour un certain pas $h$ et $y$ la solution exacte (ou du moins une
+    solution très précise). On peut aussi utiliser l'erreur de consistance
+    suivante (rappel: $h = \frac{1}{N}$):}
+\[
+    e(h) = \max_{0 \leq n \leq N} \abs{y_n - y(t_n)}{}.
+\]
+
+    Voir le fichier \emph{test\_methods\_order.m} pour le code et la
+    Figure~\ref{fig:orderee}.
+\end{enumerate}
+
+\subsection{Euler Implicite}
+La méthode d’Euler Implicite s’écrit:
+\begin{equation}\label{eq:eulerim}
+    y_{n + 1} = y_n + h f(t_{n + 1}, y_{n + 1}).
+\end{equation}
+
+\begin{enumerate}
+    \item \emph{Remarquer que pour cette méthode il est nécessaire de résoudre un
+    système à chaque étape. Remarquer de plus que si $f$ est non linéaire alors ce
+    système devient nécessaire.}
+
+    \item \emph{Implémenter la méthode de Newton de recherche du zéro d’un système
+    d’équation. La tester sur des cas simples de votre choix. Rappel: Pour trouver
+    le zéro d'un fonction vectorielle $F: \field{R}^d \to \field{R}^d$ il faut
+    résoudre itérativement le problème suivant:}
+\[
+    F'(s_n)(s_{n + 1} - s_n) = -F(s_n)
+\]
+avec $F'(s_n)$ la matrice jacobienne de $F$ en $s_n$.
+
+    Voir le fichier \emph{NewtonSolver.m} pour le code MATLAB.
+
+    \item \emph{Retrouver, par un raisonnement formel, pourquoi l'on doit résoudre le
+    systéme \eqref{eq:eulerim}.}
+
+    \item \emph{Implémenter la méthode d’Euler Implicite.}
+
+    Voir le fichier \emph{BackwardEuler.m} pour le code MATLAB.
+
+    \item \emph{Faire quelques cas tests sur des exemples simples. Se pose-t-il le
+    même problème qu'avec Euler Explicite si le pas $h$ devient trop grand?}
+
+    Voir le fichier \emph{test\_methods.m} pour le code MATLAB.
+
+    La méthode d'Euler Implicite est inconditionallement stable donc elle n'a pas
+    des problèmes si le pas devient trop grand.
+
+    \item \emph{Tracer les courbes d'erreur de la méthode en échelle log-log et
+    vérifier que l'ordre de cette méthode est le même que pour Euler Explicite.}
+
+    Voir le fichier \emph{test\_methods\_order.m} pour le code MATLAB.
+\end{enumerate}
+
+\subsection{Problème raide}
+
+Voici un exemple de problème raide (stiff problem). Considérons le problème de
+Cauchy suivant:
+\begin{equation}\label{eq:raide}
+\left\{
+\begin{array}{ll}
+    y'(t) = -\lambda y + 1 + \lambda t, & \quad 0 \leq t \leq T \\
+    y(0) = 1 &
+\end{array}
+\right.
+\end{equation}
+
+\begin{enumerate}
+    \item \emph{Calculer la solution exacte.}
+
+    La solution exact est:
+\[
+    y(t) = e^{-\lambda t} + t
+\]
+    \item \emph{Prendre $\lambda = 600$. Comparer les méthodes d'Euler Explicite et
+    Implicite lorsque $h = 0.01$ et $h = 0.001$.}
+
+    Pour chaque méthodes nous prenons:
+\[
+    e(h) = \max_{0 \leq n \leq N} \abs{y_n - y(t_n)}{}.
+\]
+avec les results suivante:
+\begin{center}
+    \begin{tabular}{|l|l|l|}\hline
+        h         & Euler Explicite         & Euler Implicite \\\hline
+        $0.01$    & $1.2634e+30$            & $0.99617$ \\\hline
+        $0.001$   & $0.99667$               & $0.99617$ \\\hline
+    \end{tabular}
+\end{center}
+
+    \item \emph{En déduire un avantage de la méthode implicite sur la explicite. Ce
+    problème est appelé ``raide'' car il nécessite un pas très petit pour
+    converger avec du explicite.}
+
+    Avec les resultats du question précédent nous pouvons conclure que la méthode
+    implicite est meilleur que la méthode explicite parce qu'elle donne des resultats
+    exactes pour tous valeur de $h$.
+
+\end{enumerate}
+
+\section{La méthode de Runge-Kutta 4}
+
+La méthode de Runge-Kutta 4 s'écrit:
+\begin{align}\nonumber
+    k_1^n & = f(t_n, y_n) \\\nonumber
+    k_2^n & = f(t_n + \frac{h}{2}, y_n + \frac{h}{2} k_1^n) \\
+    k_3^n & = f(t_n + \frac{h}{2}, y_n + \frac{h}{2} k_2^n) \\\nonumber
+    k_4^n & = f(t_{n + 1}, y_n + h k_3^n) \\\nonumber
+    y_{n + 1} & = y_n + \frac{h}{6}(k_1^n + 2 k_2^n + 2k_3^n + k_4^n)
+\end{align}
+
+\begin{enumerate}
+    \item \emph{Implémenter cette méthode.}
+
+    Voir le fichier \emph{RungeKutta4.m} pour le code MATLAB.
+
+    \item \emph{Faire quelques cas tests sur des exemples simples. Remarquer qu'il se
+    pose des problèmes lorsque le pas $h$ devient trop grand.}
+
+    Voir le fichier \emph{test\_methods.m} pour le code MATLAB.
+
+    \item \emph{Tracer les courbes d'erreur de la méthode en échelle log-log et
+    déterminer l'ordre de cette méthode.}
+
+    \item \emph{Résoudre le problème raide précédent en utilisant les mêmes données
+    mais avec la méthode de RK4. Que remarque-t-on?}
+\end{enumerate}
+
+\section{La méthode de Crank-Nicolson}
+
+La méthode de Crank-Nicolson s'écrit:
+\begin{align}
+    y_{n + \frac{1}{2}} & = y_n + \frac{h}{2} f(t_n + \frac{h}{2}, y_{n + \frac{1}{2}})
+    \\\nonumber
+    y_{n + 1} & = y_n + hf(t_n + \frac{h}{2}, y_{n + \frac{1}{2}})
+\end{align}
+
+\begin{enumerate}
+    \item \emph{Implémenter cette méthode. (méthode implicite donc utilisant la
+    méthode de Newton précédemment implémentée).}
+
+    \item \emph{Faire quelques cas tests sur des exemples simples.}
+
+    \item \emph{Tracer les courbes d'erreur de la méthode en échelle log-log et montrer
+    que la méthode est d'ordre 2.}
+
+    \item \emph{Résoudre le problème raide précédent en utilisant les mêmes données mais
+    avec la méthode de Crank-Nicolson. Que remarque-t-on?}
+\end{enumerate}
+
+\section{Application au pendule pesant}
+\end{document}

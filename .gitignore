@@ -15,6 +15,7 @@ __pychache__
 *.o
 *.so
 *.pdf
+*.dvi
 *.mat
 *.exe
 *.gch
