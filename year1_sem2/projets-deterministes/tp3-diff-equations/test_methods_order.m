@@ -8,7 +8,7 @@ clear all;
 % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
 % init data
-T = 10;                 % time interval [0, T]
+T = 1.5;                % time interval [0, T]
 N = [10:20:300];        % number of discretizations
 y0 = 1;                 % initial value
 
@@ -17,21 +17,19 @@ errb = 0 .* N;          % backward method error
 errrk = 0 .* N;         % runge kutta 4 error
 errcn = 0 .* N;         % crank nicolson error
 
-h = 0 .* N;             % step for each N(i)
+h = T ./ N;             % step for each N(i)
 
 % our EDO is:
 %       | y'(t) + 2 * y(t) = 2 - e^(-4 * t)             (1)
 %       | y(0) = 1
 % thus we have the following functions:
-f = @(t, y) 2 - exp(-4 * t) - 2 * y;                    % f(t, y(t))
-df = @(t, y) -2;                                        % f'(t, y(t))
+f = @(t, y) 2 - exp(-4 * t) - 2 * y;                    % f(t, y)
+df = @(t, y) -2;                                        % df(t, y)/dy
 y = @(t) 1 + 1/2 * exp(-4 * t) - 1/2 * exp(-2 * t);     % real solution for (1)
 
 % compute the error for each number of discretizations to see how the error
 % gets smaller when we decrease the step.
 for i = 1:length(N)
-    % compute current step
-    h(i) = T / N(i);
 
     % compute approximations with our functions
     yeulerf = ForwardEuler(f, y0, N(i), T);
@@ -50,20 +48,20 @@ for i = 1:length(N)
 end
 
 % compute the order of the Forward Euler method
-orderf = regress(log2(errf(1:N - 1))', log2(errf(2:N))');
-orderf = sprintf('order %f', orderf);
+orderf = robustfit(log2(h), log2(errf));
+orderf = sprintf('order %f', orderf(2));
 
 % compute the order of the Backward Euler method
-orderb = regress(log2(errb(1:N - 1))', log2(errb(2:N))');
-orderb = sprintf('order %f', orderb);
+orderb = robustfit(log2(h), log2(errb));
+orderb = sprintf('order %f', orderb(2));
 
 % compute the order of the Runge Kutta 4 method
-orderrk = regress(log2(errrk(1:N - 1))', log2(errrk(2:N))');
-orderrk = sprintf('order %f', orderrk);
+orderrk = robustfit(log2(h), log2(errrk));
+orderrk = sprintf('order %f', orderrk(2));
 
 % compute the order of the Crank-Nicolson method
-ordercn = regress(log2(errcn(1:N - 1))', log2(errcn(2:N))');
-ordercn = sprintf('order %f', ordercn);
+ordercn = robustfit(log2(h), log2(errcn));
+ordercn = sprintf('order %f', ordercn(2));
 
 % make pretty pictures for Forward Euler
 figure(1);
@@ -86,7 +84,7 @@ legend(orderb);
 subplot(2, 2, 3);
 loglog(h, errrk);
 hold on;
-loglog(h, h, 'r');
+loglog(h, h.^4, 'r');
 title('Runge Kutta 4');
 legend(orderrk);
 
