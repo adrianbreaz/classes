@@ -29,13 +29,13 @@ struct creader {
 void add_key(creader_t *reader, const char *key, const int value);
 
 /*
- * Remove a key from the configuration. Returns -1 if the key didn't exist,
+ * Remove a key from the configuration. Returns 0 if the key didn't exist,
  * 1 otherwise;
  * */
 int remove_key(creader_t *reader, const char *key);
 
 /*
- * Returns 1 if the key exists, -1 if not. The value is stored in value;
+ * Returns 1 if the key exists, 0 if not. The value is stored in value;
  * */
 int get_value(const creader_t *reader, const char *key, int *value);
 

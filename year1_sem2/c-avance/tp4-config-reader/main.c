@@ -27,7 +27,7 @@ int main(void)
     else
         printf("NOT FOUND xadas\n");
 
-    write_config(reader);
+//     write_config(reader);
     free_reader(reader);
 
     return 0;

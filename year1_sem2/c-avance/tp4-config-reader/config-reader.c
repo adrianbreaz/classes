@@ -38,7 +38,7 @@ int remove_key(creader_t *reader, const char *key)
 
     /* there's nothing here */
     if(!it)
-        return -1;
+        return 0;
 
     /* it's the first one! */
     if(!strcmp(it->key, key))
@@ -55,7 +55,7 @@ int remove_key(creader_t *reader, const char *key)
 
     /* oh well, it wasn't meant to be */
     if(!it->next)
-        return -1;
+        return 0;
 
     tmp = it->next;
     it->next = it->next->next;
@@ -99,6 +99,9 @@ creader_t *init_reader(const char *filename)
 
 void read_config(creader_t *reader)
 {
+    /* first thing's first. */
+    flush_config(reader);
+
     FILE *fd;
     char buf[MAXLINESIZE];
     char key[MAXKEYSIZE];
@@ -108,8 +111,13 @@ void read_config(creader_t *reader)
     fd = fopen(reader->filename, "r");
     while(fgets(buf, MAXLINESIZE, fd))
     {
-        /* reading */
-        sscanf(buf, "%s = %d", key, &value);
+        /* fancy reading:
+         *      - first space is for ignoring all starting whitespace
+         *      - [^= ] is a normal regular expression that reads until the
+         *      first = or space to support x=0 and x = 0
+         *      - ending whitespace is ignored automatically
+         */
+        sscanf(buf, " %[^= ] = %d", key, &value);
         add_key(reader, key, value);
     }
 
