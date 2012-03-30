@@ -8,6 +8,7 @@
  * TODO: make the keys into a hash map and not a linked list.
  * never implemented a hash map before. :X
  * */
+
 typedef struct cnode cnode_t;
 typedef struct creader creader_t;
 

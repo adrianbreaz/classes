@@ -14,7 +14,6 @@ int main(void)
     add_key(reader, "thisisworking", 42);
     print_config(reader);
 
-    print_config(reader);
     remove_key(reader, "thisisworking");
     print_config(reader);
 
@@ -26,7 +25,7 @@ int main(void)
     if(get_value(reader, "xadas", &v))
         printf("FOUND xadas = %d\n", v);
     else
-        printf("NOT FOUND x\n");
+        printf("NOT FOUND xadas\n");
 
     write_config(reader);
     free_reader(reader);

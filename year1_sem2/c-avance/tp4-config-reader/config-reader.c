@@ -4,19 +4,7 @@
 
 #include "config-reader.h"
 
-/*
- * A somewhat safer copy, I hope.
- */
-void mstrcpy(char *dest, const char *src)
-{
-    int len = strlen(src) + 1;
-
-    dest = (char *)malloc(sizeof(char) * len);
-    strncpy(dest, src, len);
-    dest[len] = '\0';
-}
-
-void mfree(cnode_t *node)
+static void mfree(cnode_t *node)
 {
     /* free string */
     free(node->key);
@@ -30,7 +18,7 @@ void add_key(creader_t *reader, const char *key, const int value)
     cnode_t *new;
 
     new = (cnode_t *)malloc(sizeof(cnode_t));
-    mstrcpy(new->key, key);
+    new->key = strdup(key);
     new->value = value;
     new->next = NULL;
 
@@ -43,59 +31,54 @@ void add_key(creader_t *reader, const char *key, const int value)
     }
 }
 
-cnode_t *get_node_by_key(const creader_t *reader, const char *key, int mode)
+int remove_key(creader_t *reader, const char *key)
 {
     cnode_t *it = reader->keys;
+    cnode_t *tmp;
 
-    /* if it's empty */
+    /* there's nothing here */
     if(!it)
-        return it;
+        return -1;
 
-    /* if not we look for it */
+    /* it's the first one! */
+    if(!strcmp(it->key, key))
+    {
+        tmp = it;
+        reader->keys = it->next;
+        mfree(tmp);
+        return 1;
+    }
+
+    /* look through the rest */
     while(it->next && strcmp(it->next->key, key))
         it = it->next;
 
-    /* NOTE: does this need breaks since i'm returning? */
-    switch(mode)
-    {
-        case 0:
-            return it;
-            break;
-        case 1:
-            if(strcmp(it->key, key) == 0)
-                return it;
-            return it->next;
-            break;
-        default:
-            return NULL;
-            break;
-    }
-}
-
-int remove_key(creader_t *reader, const char *key)
-{
-    cnode_t *it = get_node_by_key(reader, key, 0);
-    cnode_t *tmp;
-
-    /* we didn't find anything */
-    if(!it || !it->next)
+    /* oh well, it wasn't meant to be */
+    if(!it->next)
         return -1;
 
-    /* we did and we're FINISHING IT!!! */
     tmp = it->next;
     it->next = it->next->next;
-    mfree(tmp);
+    free(tmp);
 
     return 1;
 }
 
 int get_value(const creader_t *reader, const char *key, int *value)
 {
-    cnode_t *it = get_node_by_key(reader, key, 1);
+    cnode_t *it = reader->keys;
 
-    /* we didn't find it */
+    /* there's nothing here */
     if(!it)
-        return -1;
+        return 0;
+
+    /* look elsewhere */
+    while(it && strcmp(it->key, key))
+        it = it->next;
+
+    /* still no luck */
+    if(!it)
+        return 0;
 
     *value = it->value;
     return 1;
@@ -108,8 +91,7 @@ creader_t *init_reader(const char *filename)
     reader = (creader_t *)malloc(sizeof *reader);
 
     /* and now it has a home. */
-    mstrcpy(reader->filename, filename);
-    printf("%s\n", reader->filename);
+    reader->filename = strdup(filename);
     reader->keys = NULL;
 
     return reader;
@@ -165,6 +147,7 @@ void print_config(const creader_t *reader)
         it = it->next;
     }
     /* no arithmetic */
+    printf("\n");
 }
 
 void flush_config(creader_t *reader)
@@ -193,25 +176,3 @@ int free_reader(creader_t *reader)
 
     return 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
