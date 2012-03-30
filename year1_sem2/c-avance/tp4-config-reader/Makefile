@@ -1,16 +1,17 @@
 FLAGS= -g
 CC=gcc
+OBJ=config-reader.o main.o
 
 all: app
 
-readkey.o: readkey.c
-	${CC} ${FLAGS} -c readkey.c
+config-reader.o: config-reader.c
+	${CC} ${FLAGS} -c config-reader.c
 
 main.o: main.c
 	${CC} ${FLAGS} -c main.c
 
-app: readkey.o main.o
-	${CC} ${FLAGS} main.o readkey.o -o app
+app: ${OBJ}
+	${CC} ${FLAGS} ${OBJ} -o app
 
 clean:
 	rm *~ app *.o
