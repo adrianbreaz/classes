@@ -51,17 +51,15 @@ function [y] = BackwardEuler(f, dfdx, y0, n, T)
     % as a function in z = y_{n + 1}:
     %       F(z) = z - y_n - h * f(t_n, z)
     % and use the Newton Rhapson method to find a zero.
-    % NOTE: Could have problems with this because:
-    %       - the Newton method is famously dependent on its initial value
-    %       - there may be multiple zeros and we're finding a 'wrong' one
-    %       - should be interesting when F'(z) = 0
+    % NOTE: Could have problems with this because the Newton method is famously
+    % dependent on its initial value
     i = 1;
     while i <= n
         % construct the functions needed for the Newton method
-        F = @(z) z - y(i) - h * f(tn(i), z);
-        dF = @(z) 1 - h * dfdx(tn(i), z);
+        F = @(z) z - y(i) - h * f(tn(i + 1), z);
+        dF = @(z) 1 - h * dfdx(tn(i + 1), z);
 
         % use the Newton method to find a zero and continue
-        y(i + 1) = NewtonSolver(F, dF, y(i));
+        y(i + 1) = NewtonSolver(F, dF, y0);
         i = i + 1;
     end

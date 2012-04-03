@@ -1,29 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "readkey.h"
-
-char keys[5][30] = {
-    "nx",
-    "ny",
-    "saveData",
-    NULL
-};
+#include "config-reader.h"
 
 int main(void)
 {
-    FILE *fd;
-    int i;
-    char line[MAXLINESIZE];
+    int v;
+    creader_t *reader = init_reader("configrc");
 
-    fd = fopen("configrc", "r");
+    read_config(reader);
 
-    for(i = 0; i < 4; i++)
-    {
-        fgets(line, MAXLINESIZE, fd);
-        printf("%s = %d", toUpper(keys[i]), readKey(line, keys[i]));
-    }
+    print_config(reader);
+    add_key(reader, "thisisworking", 42);
+    print_config(reader);
 
-    fclose(fd);
+    remove_key(reader, "thisisworking");
+    print_config(reader);
+
+    if(get_value(reader, "x", &v))
+        printf("FOUND x = %d\n", v);
+    else
+        printf("NOT FOUND x\n");
+
+    if(get_value(reader, "xadas", &v))
+        printf("FOUND xadas = %d\n", v);
+    else
+        printf("NOT FOUND xadas\n");
+
+//     write_config(reader);
+    free_reader(reader);
+
     return 0;
 }

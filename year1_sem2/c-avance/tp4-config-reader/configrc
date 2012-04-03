@@ -1,3 +1,5 @@
-nx = 200
-ny = 10
-saveddata = 14
+ny = 1
+y=2
+ saveddata = 3
+pie = 4
+x = 5

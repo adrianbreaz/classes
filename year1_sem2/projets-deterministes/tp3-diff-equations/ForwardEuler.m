@@ -42,12 +42,12 @@ function [y] = ForwardEuler(f, y0, n, T)
     tn = 0:h:T;
 
     % init approximations
-    y = zeros(1, n + 1);
-    y(1) = y0;
+    y = zeros(length(y0), n + 1);
+    y(:, 1) = y0;
 
     % compute for each t_n using (1)
     i = 1;
     while i <= n
-        y(i + 1) = y(i) + h * f(tn(i), y(i));
+        y(:, i + 1) = y(:, i) + h * f(tn(i), y(:, i));
         i = i + 1;
     end

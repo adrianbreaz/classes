@@ -4,7 +4,7 @@ function [y] = RungeKutta4(f, y0, n, T)
     %    | y'(t) = f(t, y(t))
     %    | y(0) = y_0
     % using the formula (1):
-    %    k_1^n = f(t_n, y_n);               
+    %    k_1^n = f(t_n, y_n);
     %    k_2^n = f(t_n + \frac{h}{2}, y_n + \frac{h}{2} * k_1^n);
     %    k_3^n = f(t_n + \frac{h}{2}, y_n + \frac{h}{2} * k_2^n);
     %    k_4^n = f(t_{n + 1}, y_n + h * k_3^n);
