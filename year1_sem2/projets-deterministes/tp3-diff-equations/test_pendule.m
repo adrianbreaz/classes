@@ -5,7 +5,7 @@ T = 10;                                     % 0s
 N = 100;
 g = 9.81;                                   % m/s^2
 L = 1;                                      % 3m
-alpha = 
+alpha = 0.6;
 theta0 = [pi/2 0]';
 
 f = @(t, theta) [theta(2) (-g / L * sin(theta(1)) - alpha * theta(2))]';
