@@ -3,10 +3,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
 
-\usepackage{algorithmic}
-\usepackage{algorithm}
 \usepackage{graphicx}
-\usepackage{multirow}
 
 \usepackage{common-formatting}
 \usepackage{common-math}
@@ -116,7 +113,6 @@ La méthode d'Euler Explicite s'écrit:
     y(t) = 1 + \frac{1}{2} e^{-4t} - \frac{1}{2} e^{-2t}
 \]
 \clearpage
-
     L'ordre est:
 \begin{figure}[h!]
     \centering
@@ -158,7 +154,7 @@ avec $F'(s_n)$ la matrice jacobienne de $F$ en $s_n$.
     \item \emph{Retrouver, par un raisonnement formel, pourquoi l'on doit résoudre le
     systéme \eqref{eq:newton}.}
 
-    Soit $F: \field{R}^d \to \field{R}^d$ une fontion définie par:
+    Soit $F: \field{R}^d \to \field{R}^d$ une fonction définie par:
 \[
     F(y) = y - y_{n} - hf(t_{n + 1}, y)
 \]
@@ -172,6 +168,12 @@ qui est obtenue à partir du système~\eqref{eq:eulerim}. Alors, la solution du 
 
     \item \emph{Faire quelques cas tests sur des exemples simples. Se pose-t-il le
     même problème qu'avec Euler Explicite si le pas $h$ devient trop grand?}
+
+     En utilisant le système~\eqref{eq:eq1}:
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.6]{./img/step-backward-euler.png}
+\end{figure}
 
     Voir le fichier \emph{test\_methods.m} pour le code MATLAB.
 
@@ -214,11 +216,11 @@ Cauchy suivant:
     \item \emph{Prendre $\lambda = 600$. Comparer les méthodes d'Euler Explicite et
     Implicite lorsque $h = 0.01$ et $h = 0.001$.}
 
-    Pour chaque méthodes nous prenons:
+    Pour chaque méthode nous prenons:
 \[
     e(h) = \max_{0 \leq n \leq N} \abs{y_n - y(t_n)}{}.
 \]
-avec les results suivante:
+avec les results suivantes:
 \begin{center}
     \begin{tabular}{|l|l|l|}\hline
         h         & Euler Explicite         & Euler Implicite \\\hline
@@ -252,7 +254,7 @@ La méthode de Runge-Kutta 4 s'écrit:
     \item \emph{Implémenter cette méthode.}
 
     Voir le fichier \emph{RungeKutta4.m} pour le code MATLAB.
-
+\clearpage
     \item \emph{Faire quelques cas tests sur des exemples simples. Remarquer qu'il se
     pose des problèmes lorsque le pas $h$ devient trop grand.}
 
@@ -261,7 +263,7 @@ La méthode de Runge-Kutta 4 s'écrit:
     \centering
     \includegraphics[scale=0.6]{./img/step-runge-kutta.png}
 \end{figure}
-\clearpage
+
     Voir le fichier \emph{test\_methods.m} pour le code MATLAB.
 
     \item \emph{Tracer les courbes d'erreur de la méthode en échelle log-log et
@@ -285,7 +287,7 @@ La méthode de Runge-Kutta 4 s'écrit:
 \end{center}
 
     On remarque que la méthode de Runge-Kutta 4 est une méthode explicite comme
-    Euler Explicite est elle a les mêmes problèmes quand $h$ devient trop grand.
+    Euler Explicite et elle a les mêmes problèmes quand $h$ devient trop grand.
 \end{enumerate}
 
 \section{La méthode de Crank-Nicolson}
@@ -304,7 +306,7 @@ La méthode de Crank-Nicolson s'écrit:
     Voir le fichier \emph{test\_methods.m} pour le code MATLAB.
 
     \item \emph{Faire quelques cas tests sur des exemples simples.}
-\clearpage
+
     En utilisant le système~\eqref{eq:eq1}:
 \begin{figure}[h!]
     \centering
@@ -312,7 +314,7 @@ La méthode de Crank-Nicolson s'écrit:
 \end{figure}
 
     Voir le fichier \emph{test\_methods.m} pour le code MATLAB.
-
+\clearpage
     \item \emph{Tracer les courbes d'erreur de la méthode en échelle log-log et montrer
     que la méthode est d'ordre 2.}
 
@@ -375,7 +377,7 @@ vitesse angulaire de la tige.}
     y(t) = \left(\!
     \begin{array}{c}
         y_1(t) \\
-        y_1(t)
+        y_2(t)
     \end{array}
   \!\right) \text{ et }
   y'(t) = f(t, y) = \left(\!
@@ -396,14 +398,14 @@ vitesse angulaire de la tige.}
     $\frac{\pi}{2}$ et la vitesse initiale vaut $0.2$. Augmenter la vitesse initiale
     jusqu'à avoir un portrait de phase différent. Que veut dire ce nouveau portrait
     de phase par rapport au précédent?}
-\clearpage
+
     Pour une vitesse initiale de $0.2$:
 \begin{figure}[h!]
     \centering
     \includegraphics[scale=0.5]{./img/pendulum-phase1.png}
     % pendulum-phase1.png: 708x479 pixel, 96dpi, 18.73x12.67 cm, bb=0 0 531 359
 \end{figure}
-
+\clearpage
     Pour une vitesse initiale de $5$:
 \begin{figure}[h!]
     \centering
@@ -413,12 +415,14 @@ vitesse angulaire de la tige.}
 
     Dans la première figure, nous pouvons voir le pendule commençant sur ​​l'axe
     horizontal, à droite. En temps, il descend à être totalement verticale, avec une
-    vitesse qui accroît. Après avoir passer la position verticale, il commence à
+    vitesse qui accroît. Après avoir passé la position verticale, il commence à
     perdre de la vitesse grace à la gravité et il tourne en arrière, avec une vitesse
     qui accroît encore. Il fait cela indéfiniment.
 
-    Dans la deuxième figure, la vitesse initial est plus grande tourne indéfiniment
-    autour de l'origine avec l'angle en constante augmentation.
+    Dans la deuxième figure, la vitesse initial est plus grande donc le pendule
+    tourne indéfiniment autour de l'origine avec l'angle en constante augmentation.
+
+    Voir le fichier \emph{test\_pendulum.m} pour le code MATLAB.
 
     \item \emph{Tracer l'évolution du portrait de phase lorsque la position initiale
     varie et la vitesse initiale est nulle. Dire quelles sont les positions
@@ -426,18 +430,41 @@ vitesse angulaire de la tige.}
     d'accrochage) et ``instables'' (le pendule tourne indéfiniment autour du point
     d’accrochage).}
 
+\begin{figure}[ht]
+    \begin{minipage}[b]{0.5\linewidth}
+        \centering
+        \includegraphics[scale=0.5]{./img/pendulum-unstable.png}
+        \caption{Position instable}
+    \end{minipage}
+    \hspace{0.5cm}
+    \begin{minipage}[b]{0.5\linewidth}
+        \centering
+        \includegraphics[scale=0.5]{./img/pendulum-stable.png}
+        \caption{Position stable}
+    \end{minipage}
+\end{figure}
+
+    Pour un vitesse initiale nulle tous les positions sont stables, mais avec un vitesse
+    initiale $\dot{\theta}(0) = 0.2$ nous trouvons des positions instables aussi.
+    Pour un angle compris entre $[3.08, 3.20]$ ($\approx \pi$, la position est presque
+    vertical) nous avons des positions instables dans lesquelles le pendule tourne
+    indéfiniment (l'angle augmente indéfiniment).
+
+    Voir le fichier \emph{test\_pendulum.m} pour le code MATLAB.
+
     \item \emph{Regardons le cas où le pendule est amorti. L'équation s'écrit alors avec
     le coefficient d'amortissement $\alpha$:}
 \[
     \ddot{\theta} = -\omega_0^2 \sin(\theta) - \alpha \dot{\theta}
 \]
 
+    Voir le fichier \emph{test\_pendulum.m} pour le code MATLAB.
+\clearpage
     \item \emph{Tracer un portrait de phase en tenant compte de l'amortissement.
     Commenter.}
-\clearpage
 \begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.7]{./img/pendulum-friction.png}
+    \includegraphics[scale=0.5]{./img/pendulum-friction.png}
     \caption{$\alpha = 0.1,~T = 50s,~\dot{\theta}(0) = 0,~\theta(0) = \frac{\pi}{2}$}
     % pendulum-friction.png: 607x504 pixel, 96dpi, 16.06x13.33 cm, bb=0 0 455 378
 \end{figure}
@@ -445,6 +472,7 @@ vitesse angulaire de la tige.}
     Avec l'amortissement nous pouvons voir que a chaque tour la vitesse du pendule
     diminue (elle tend vers 0).
 
+    Voir le fichier \emph{test\_pendulum.m} pour le code MATLAB.
 \end{enumerate}
 
 \end{document}

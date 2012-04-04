@@ -6,9 +6,10 @@ clear all;
 % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
 % init data
-T = 15;                          % time interval [0, T]
-N = [10 100 1000];              % number of discretizations
-colors = ['b:', 'k:', 'g:'];
+T = 5;                                % time interval [0, T]
+N = [100 1000 10000];              % number of discretizations
+colors = ['b:', 'k:', 'g:', 'y:'];
+h = 0 .* N;
 
 % test functions:
 % NOTE: this seems to be too easy for RK4
@@ -28,24 +29,26 @@ y = @(t) exp(t / 2) .* sin(5 * t);                      % real solution
 % gets smaller when we decrease the step.
 
 % compute the exact solution
-yexact = y(0:T/N(2):T);
+yexact = y(0:T/N(3):T);
 
 figure(1);
-plot(0:T/N(2):T, yexact, 'r');
+plot(0:T/N(3):T, yexact, 'r');
 hold on;
 for i = 1:length(N)
     % compute current step
-    h = T / N(i);
+    h(i) = T / N(i);
 
     % compute approximations with our functions
     % ymethod = ForwardEuler(f, y0, N(i), T);
-    % ymethod = BackwardEuler(f, df, y0, N(i), T);
-    ymethod = RungeKutta4(f, y0, N(i), T);
+    ymethod = BackwardEuler(f, df, y0, N(i), T);
+    % ymethod = RungeKutta4(f, y0, N(i), T);
     % ymethod = CrankNicolson(f, df, y0, N(i), T);
 
-    plot(0:h:T, ymethod, colors(i));
+    max(abs(ymethod - y(0:h(i):T)))
+    plot(0:h(i):T, ymethod, colors(i));
 end
 
-legend(sprintf('solution exacte'), sprintf('h=%.3f', h*100), sprintf('h=%.3f', h * 10), sprintf('h=%.3f', h));
-axis([0 15 -20 40])
+h = h .* 10;
+legend(sprintf('solution exacte'), sprintf('h=%.4f', h(1)), sprintf('h=%.4f', h(2)), sprintf('h=%.4f', h(3)));
+axis([0 5 -20 40]);
 hold off;

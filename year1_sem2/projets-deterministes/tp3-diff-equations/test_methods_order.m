@@ -48,20 +48,20 @@ for i = 1:length(N)
 end
 
 % compute the order of the Forward Euler method
-orderf = regress(log2(h)', log2(errf)');
-orderf = sprintf('order %f', orderf);
+orderf = robustfit(log2(h), log2(errf));
+orderf = sprintf('order %f', orderf(2));
 
 % compute the order of the Backward Euler method
-orderb = regress(log2(h)', log2(errb)');
-orderb = sprintf('order %f', orderb);
+orderb = robustfit(log2(h), log2(errb));
+orderb = sprintf('order %f', orderb(2));
 
 % compute the order of the Runge Kutta 4 method
-orderrk = regress(log2(h)', log2(errrk)');
-orderrk = sprintf('order %f', orderrk);
+orderrk = robustfit(log2(h), log2(errrk));
+orderrk = sprintf('order %f', orderrk(2));
 
 % compute the order of the Crank-Nicolson method
-ordercn = regress(log2(h)', log2(errcn)');
-ordercn = sprintf('order %f', ordercn);
+ordercn = robustfit(log2(h), log2(errcn));
+ordercn = sprintf('order %f', ordercn(2));
 
 % make pretty pictures for Forward Euler
 figure(1);

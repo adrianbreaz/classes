@@ -6,14 +6,14 @@ clear all;
 % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
 % init data
-T = 0.5;                % time interval [0, T]
-N = [100 1000];         % number of discretizations
-y0 = 1;                 % initial value
-errf = 0 .* N;          % forward euler method error
-errb = 0 .* N;          % backward euler method error
-errrk = 0 .* N;         % runge kutta 4 error
-errcn = 0 .* N;         % crank-nicolson error
-h = 0 .* N;             % step for each N(i)
+T = 0.5;                        % time interval [0, T]
+N = [10 100 1000 10000];        % number of discretizations
+y0 = 1;                         % initial value
+errf = 0 .* N;                  % forward euler method error
+errb = 0 .* N;                  % backward euler method error
+errrk = 0 .* N;                 % runge kutta 4 error
+errcn = 0 .* N;                 % crank-nicolson error
+h = 0 .* N;                     % step for each N(i)
 lambda = 600;
 
 % our EDO is:
@@ -46,7 +46,14 @@ for i = 1:length(N)
     errcn(i) = max(abs(ycrankn - yexact));
 end
 
-errf
-errb
-errrk
-errcn
+disp('error forward euler');
+disp(errf);
+
+disp('error backward euler');
+disp(errb);
+
+disp('error runge-kutta 4');
+disp(errrk);
+
+disp('error crank-nicolson');
+disp(errcn);
