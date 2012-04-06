@@ -1,0 +1,66 @@
+On décrit ici un cas (très particulier) de format de fichier VTK qui permet d'afficher
+un des données définies sur le maillage d'un domaine 2D composé de cellules triangulaires.
+
+Voici la structure du fichier.
+
+description du maillage:
+* nbPoints sommets (vertices/nodes)
+* chaque sommet Nk, 0<= k <= (nbPoints-1) a pour coordonnées
+    (Nkx, Nky, Nkz=0)
+(la dernière coordonnées sera toujours prise nulle pour des données 2D)
+
+* nbCells cellules (ici: toutes triangulaires)
+* chaque cellule triangulaire Cellp, 0 <= p <=  (nbCells-1) est totalement décrite par 3 entiers: 
+<indice_sommet0> <indice_sommet1> <indice_sommet2>
+
+* dans le fichier une cellule est décrite par une ligne de 4 entiers:
+<nbSommets> <indice_sommet0> <indice_sommet1> <indice_sommet2>
+
+sachant que pour notre cas particulier on a toujours:
+	nbSommets=3
+
+* nbIntForAllCells est un entier (int) qui décrit le nombre d'entiers permettant de décrire toutes les cellules du maillage, pour 
+un maillage triangulaire ce sera donc:
+               nbIntForAllCells = nbCells*4
+
+* VTK utilise un système de tag pour indiquer le type de cellule. Le tag pour des triangles est
+		tag = 5
+
+La structure d'un fichier vtk est la suivante (attention aux espaces)
+
+----------------------- debut fichier foo.vtk
+# vtk DataFile Version 3.1
+<ceci est une ligne destinée à recevoir une chaine de caractère arbitraire>
+ASCII
+DATASET UNSTRUCTURED_GRID
+
+POINTS <nbPoints> FLOAT
+N0x N0y 0
+N1x N1y 0
+...
+N(nbPoints-1)x N(nbPoints-1)y 0
+
+CELLS <nbCells> <nbIntForAllCells>
+3 <Cell0_sommet0> <Cell0_sommet1> <Cell0_sommet2>
+3 <Cell1_sommet0> <Cell1_sommet1> <Cell1_sommet2>
+...
+3 <Cell(nbCells-1)_sommet0> <Cell(nbCells-1)_sommet1> <Cell(nbCells-1)_sommet2>
+
+CELL_TYPES <nbCells>
+tagCell0 ...(autant que de cellules)... tagCell(nbCell-1) 
+
+CELL_DATA <nbCells>
+SCALARS variable1 float 1
+LOOKUP_TABLE default
+data_variable1_dans_cell0
+data_variable1_dans_cell1
+...
+data_variable1_dans_cell(nbCells-1)
+
+SCALARS variable2 float 1
+LOOKUP_TABLE default
+data_variable2_dans_cell0
+data_variable2_dans_cell1
+...
+data_variable2_dans_cell(nbCells-1)
+----------------------- fin fichier foo.vtk

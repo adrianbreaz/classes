@@ -1,0 +1,62 @@
+On décrit très succintement (et de manière non-exhaustive) le format de fichier de sortie du logiciel 
+
+TRIANGLE
+
+( http://people.sc.fsu.edu/~jburkardt/c_src/triangle/triangle.html )
+écrit par Jonathan Shewchuk. 
+
+Ce logiciel permet de générer des maillages triangulaires 2D.
+
+A partir d'un fichier de configuration
+	foo.poly
+Le logiciel va générer 4 fichiers de sortie qui décrivent le maillage de triangle produit par TRIANGLE:
+
+* foo.1.node : information sur les noeuds/sommets des triangles
+* foo.1.edge : information sur les faces (edges)
+* foo.1.ele  : information sur les cellules triangulaires
+
+Remarque 1: il y a un deux autres fichiers de sortie foo.1.neigh et foo.1.poly, mais ceux-ci ne nous intéressent pas ici.
+Remarque 2: on ne donne pas de description sur le fichier foo.poly.
+
+Voici une brève description du contenu de ces trois types de fichier:
+
+(remarque: on ne tiendra pas compte ici de informations sur les attributs)
+
+
+1/_______________ foo.1.node _______________ 
+première ligne:   <nb de sommets> <dimension (nécessairement=2)> <nb d'attributs> <tag d'indicateur de frontière (0 ou 1)>
+lignes suivantes: <indice du somment> <x> <y> [attributs (facultatif)] <indice de frontière>
+
+
+
+2/_______________ foo.1.edge _______________ 
+première ligne  : <nb de faces> <tag d'indicateur de frontière (0 ou 1)>
+lignes suivantes: <indice de la face> <indice du sommet de début> <indice du sommet de fin>  <indice de frontière>
+
+
+
+3/_______________ foo.1.ele  _______________ 
+première ligne  : <nb de cellule> <nb de sommets par cellule (=3 nécessairement)> <nb d'attributs>
+lignes suivantes: <indice de la cellule> <indice du sommet 0> <indice du sommet 1> <indice du sommet 2> [attributs (facultatifs)]
+
+***********************************************************************************
+
+On fournit deux exemple de maillage:
+
+example1
+├── aSquare.1.edge
+├── aSquare.1.ele
+├── aSquare.1.neigh
+├── aSquare.1.node
+├── aSquare.1.poly
+└── aSquare.poly
+
+example2
+├── square_circle_hole.1.edge
+├── square_circle_hole.1.ele
+├── square_circle_hole.1.neigh
+├── square_circle_hole.1.node
+├── square_circle_hole.1.poly
+└── square_circle_hole.poly
+
+
