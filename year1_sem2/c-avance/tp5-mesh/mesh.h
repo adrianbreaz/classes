@@ -11,8 +11,10 @@ struct node_t {
     double      x;
     /* y coordinate */
     double      y;
+    /* number of node attributes (UNUSED)*/
+    int         nb_attrs;
     /* attributes (UNUSED) */
-    char        *attrs;
+    char        **attr;
     /* on which border of the mesh it is located (UNUSED) */
     int         border;
 };
@@ -23,9 +25,13 @@ struct node_t {
  *
  * */
 struct edge_t {
+    /* top node */
     node_t      *up;
+    /* bottom node */
     node_t      *down;
+    /* on which border are we located (UNUSED) */
     int         border;
+    /* length of the edge (UNUSED) */
     double      length;
 };
 
@@ -34,10 +40,10 @@ struct cell_t {
     node_t      **node;
     /* Pointers to the edges in the cell */
     edge_t      **edge;
-    /* Area of the cell */
-    double      area;
     /* Type of the cell. Also tells the number of nodes and edges */
     int         nb_nodes;
+    /* Area of the cell (UNUSED) */
+    double      area;
 };
 
 struct mesh_t {
@@ -62,9 +68,9 @@ mesh_t *init_mesh();
 void free_mesh(mesh_t *mesh);
 
 /* Read data from all the files */
-void read_data(mesh_t *mesh, char *file_basename);
+void read_data(mesh_t *mesh, const char *file_basename);
 
 /* Transform it to the VTK format and write it to a file */
-void write_data_to_vtk(mesh_t *mesh, char *dstFile);
+void write_data_to_vtk(mesh_t *mesh, const char *dstFile);
 
 #endif /* __MESH_H__ */
