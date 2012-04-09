@@ -38,6 +38,7 @@ struct edge_t {
 struct cell_t {
     /* Pointers to the nodes in the cell */
     node_t      **node;
+    int         *nodes_id;
     /* Pointers to the edges in the cell */
     edge_t      **edge;
     /* Type of the cell. Also tells the number of nodes and edges */
@@ -71,6 +72,6 @@ void free_mesh(mesh_t *mesh);
 void read_data(mesh_t *mesh, const char *file_basename);
 
 /* Transform it to the VTK format and write it to a file */
-void write_data_to_vtk(mesh_t *mesh, const char *dstFile);
+void write_data_to_vtk(mesh_t *mesh, const char *dst_file);
 
 #endif /* __MESH_H__ */
