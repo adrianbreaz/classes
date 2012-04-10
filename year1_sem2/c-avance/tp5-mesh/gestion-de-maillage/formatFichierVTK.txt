@@ -10,7 +10,7 @@ description du maillage:
 (la dernière coordonnées sera toujours prise nulle pour des données 2D)
 
 * nbCells cellules (ici: toutes triangulaires)
-* chaque cellule triangulaire Cellp, 0 <= p <=  (nbCells-1) est totalement décrite par 3 entiers: 
+* chaque cellule triangulaire Cellp, 0 <= p <=  (nbCells-1) est totalement décrite par 3 entiers:
 <indice_sommet0> <indice_sommet1> <indice_sommet2>
 
 * dans le fichier une cellule est décrite par une ligne de 4 entiers:
@@ -19,7 +19,7 @@ description du maillage:
 sachant que pour notre cas particulier on a toujours:
 	nbSommets=3
 
-* nbIntForAllCells est un entier (int) qui décrit le nombre d'entiers permettant de décrire toutes les cellules du maillage, pour 
+* nbIntForAllCells est un entier (int) qui décrit le nombre d'entiers permettant de décrire toutes les cellules du maillage, pour
 un maillage triangulaire ce sera donc:
                nbIntForAllCells = nbCells*4
 
@@ -47,7 +47,7 @@ CELLS <nbCells> <nbIntForAllCells>
 3 <Cell(nbCells-1)_sommet0> <Cell(nbCells-1)_sommet1> <Cell(nbCells-1)_sommet2>
 
 CELL_TYPES <nbCells>
-tagCell0 ...(autant que de cellules)... tagCell(nbCell-1) 
+tagCell0 ...(autant que de cellules)... tagCell(nbCell-1)
 
 CELL_DATA <nbCells>
 SCALARS variable1 float 1

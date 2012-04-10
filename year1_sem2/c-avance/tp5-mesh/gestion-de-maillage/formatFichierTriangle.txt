@@ -1,9 +1,9 @@
-On décrit très succintement (et de manière non-exhaustive) le format de fichier de sortie du logiciel 
+On décrit très succintement (et de manière non-exhaustive) le format de fichier de sortie du logiciel
 
 TRIANGLE
 
 ( http://people.sc.fsu.edu/~jburkardt/c_src/triangle/triangle.html )
-écrit par Jonathan Shewchuk. 
+écrit par Jonathan Shewchuk.
 
 Ce logiciel permet de générer des maillages triangulaires 2D.
 
@@ -23,19 +23,19 @@ Voici une brève description du contenu de ces trois types de fichier:
 (remarque: on ne tiendra pas compte ici de informations sur les attributs)
 
 
-1/_______________ foo.1.node _______________ 
+1/_______________ foo.1.node _______________
 première ligne:   <nb de sommets> <dimension (nécessairement=2)> <nb d'attributs> <tag d'indicateur de frontière (0 ou 1)>
 lignes suivantes: <indice du somment> <x> <y> [attributs (facultatif)] <indice de frontière>
 
 
 
-2/_______________ foo.1.edge _______________ 
+2/_______________ foo.1.edge _______________
 première ligne  : <nb de faces> <tag d'indicateur de frontière (0 ou 1)>
 lignes suivantes: <indice de la face> <indice du sommet de début> <indice du sommet de fin>  <indice de frontière>
 
 
 
-3/_______________ foo.1.ele  _______________ 
+3/_______________ foo.1.ele  _______________
 première ligne  : <nb de cellule> <nb de sommets par cellule (=3 nécessairement)> <nb d'attributs>
 lignes suivantes: <indice de la cellule> <indice du sommet 0> <indice du sommet 1> <indice du sommet 2> [attributs (facultatifs)]
 
