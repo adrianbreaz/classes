@@ -17,6 +17,8 @@ struct node_t {
     char        **attr;
     /* on which border of the mesh it is located (UNUSED) */
     int         border;
+    /* index of the node */
+    int         id;
 };
 
 /*
@@ -38,7 +40,6 @@ struct edge_t {
 struct cell_t {
     /* Pointers to the nodes in the cell */
     node_t      **node;
-    int         *nodes_id;
     /* Pointers to the edges in the cell */
     edge_t      **edge;
     /* Type of the cell. Also tells the number of nodes and edges */

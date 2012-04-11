@@ -3,7 +3,7 @@
 
 #include "mesh.h"
 
-const char basename[] = "./gestion-de-maillage/example1/aSquare";
+const char basename[] = "./example1/aSquare";
 const char dst[] = "example1.vtk";
 
 int main(void)
