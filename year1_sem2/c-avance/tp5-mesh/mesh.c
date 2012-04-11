@@ -53,7 +53,7 @@ void read_nodes(mesh_t *mesh, const char *filename)
 {
     int id, b;
     double x, y;
-    int nb_attrs, border;
+    int nb_attrs, border, tmp;
 
     FILE *fd;
     char buf[MAXLINESIZE];
@@ -68,10 +68,11 @@ void read_nodes(mesh_t *mesh, const char *filename)
     while(fgets(buf, MAXLINESIZE, fd) !=  NULL)
     {
         /* TODO: this is incredibly short-sighted */
-        border = sscanf(buf, "%d %lg %lg %d", &id, &x, &y, &b);
-        
-        if(border < 4)
-            break;
+        tmp = sscanf(buf, "%d %lg %lg %d", &id, &x, &y, &b);
+
+        /* should we break? */
+        if(tmp < 4)
+            continue;
 
         mesh->node[id].x = x;
         mesh->node[id].y = y;
@@ -89,7 +90,7 @@ void read_nodes(mesh_t *mesh, const char *filename)
 void read_edges(mesh_t *mesh, const char *filename)
 {
     int id, n1, n2, b;
-    int tmp;
+    int border, tmp;
 
     FILE *fd;
     char buf[MAXLINESIZE];
@@ -97,8 +98,7 @@ void read_edges(mesh_t *mesh, const char *filename)
     fd = fopen(filename, "r");
 
     /* first read the 'header' */
-    fscanf(fd, "%d %d\n", &(mesh->nb_edges), &tmp);
-
+    fscanf(fd, "%d %d\n", &(mesh->nb_edges), &border);
     mesh->edge = (edge_t *)malloc(sizeof(edge_t) * mesh->nb_edges);
 
     /* TODO: this reading thing needs to be made more robust, probably not
@@ -107,9 +107,10 @@ void read_edges(mesh_t *mesh, const char *filename)
     while(fgets(buf, MAXLINESIZE, fd) != NULL)
     {
         tmp = sscanf(buf, "%d %d %d %d", &id, &n1, &n2, &b);
-        
+
+        /* should we break? */
         if(tmp < 4)
-            break;
+            continue;
 
         mesh->edge[id].up = &(mesh->node[n1]);
         mesh->edge[id].down = &(mesh->node[n2]);
@@ -124,26 +125,26 @@ void read_edges(mesh_t *mesh, const char *filename)
 void read_cells(mesh_t *mesh, const char *filename)
 {
     int id, n1, n2, n3;
-    int tmp, nb_nodes;
+    int tmp, border, nb_nodes;
 
     FILE *fd;
     char buf[MAXLINESIZE];
     int i;
-    
+
     fd = fopen(filename, "r");
 
     /* first read the 'header' */
-    fscanf(fd, "%d %d %d\n", &(mesh->nb_cells), &nb_nodes, &tmp);
-
+    fscanf(fd, "%d %d %d\n", &(mesh->nb_cells), &nb_nodes, &border);
     mesh->cell = (cell_t *)malloc(sizeof(cell_t) * mesh->nb_cells);
 
-    /* TODO: get list of edges as well */
+    /* TODO: get list of edges as well. how? */
     while(fgets(buf, MAXLINESIZE, fd) != NULL)
     {
         tmp = sscanf(buf, "%d %d %d %d", &id, &n1, &n2, &n3);
-        
+
+        /* should we break? */
         if(tmp < 4)
-            break;
+            continue;
 
         mesh->cell[id].node = (node_t **)malloc(sizeof(node_t *) * nb_nodes);
 
@@ -167,7 +168,7 @@ void read_cells(mesh_t *mesh, const char *filename)
 mesh_t *init_mesh()
 {
     mesh_t *mesh;
-    mesh = (mesh_t *)calloc(1, sizeof(mesh_t));
+    mesh = (mesh_t *)calloc(1, sizeof(mesh_t)); // calloc rules.
 
     return mesh;
 }
@@ -182,7 +183,6 @@ void free_mesh(mesh_t *mesh)
     /* there have to be some! please! */
     if(mesh->node)
     {
-        /* delete all attributes, only if we have any */
         /* NOTE: number of attributes is set globally so if the first one doesn't have
          * any, none of them do.
          */
@@ -198,7 +198,9 @@ void free_mesh(mesh_t *mesh)
         free(mesh->node);
     }
 
-    /* maybe we have better luck here, although if we have no node we should have no edges */
+    /* maybe we have better luck here, although if we have no nodes we should
+     * have no edges
+     */
     if(mesh->edge)
     {
         free(mesh->edge);
@@ -207,7 +209,6 @@ void free_mesh(mesh_t *mesh)
     /* yeah. better safe than sorry */
     if(mesh->cell)
     {
-        /* stupid dynamic number of nodes and stuff */
         /* NOTE: number of nodes (edges) of a cell is set globally so if one doesn't
          * have any, none of them do.
          */
@@ -267,7 +268,9 @@ void write_data_to_vtk(mesh_t *mesh, const char *dst_file)
     fprintf(fd, "POINTS %d FLOAT\n", mesh->nb_nodes);
 
     for(i = 0; i < mesh->nb_nodes; i++)
-        fprintf(fd, "%g %g %d\n", mesh->node[i].x, mesh->node[i].y, 0);
+    {
+        fprintf(fd, "%lg %lg %d\n", mesh->node[i].x, mesh->node[i].y, 0);
+    }
 
     fprintf(fd, "\nCELLS %d %d\n", mesh->nb_cells, 4 * mesh->nb_cells);
 
@@ -281,8 +284,12 @@ void write_data_to_vtk(mesh_t *mesh, const char *dst_file)
 
     fprintf(fd, "\nCELL_TYPES %d\n", mesh->nb_cells);
     for(i = 0; i < mesh->nb_cells; i++)
+    {
         fprintf(fd, "5 ");
-    fprintf(fd, "\b\n");
+    }
 
+    fprintf(fd, "\n");
+
+    /* TODO: add CELL_DATA stuff that I have no way of getting */
     fclose(fd);
 }

@@ -11,14 +11,14 @@ struct node_t {
     double      x;
     /* y coordinate */
     double      y;
-    /* number of node attributes (UNUSED)*/
+    /* index of the node */
+    int         id;
+    /* number of node attributes (UNUSED) */
     int         nb_attrs;
     /* attributes (UNUSED) */
     char        **attr;
     /* on which border of the mesh it is located (UNUSED) */
     int         border;
-    /* index of the node */
-    int         id;
 };
 
 /*
@@ -38,12 +38,12 @@ struct edge_t {
 };
 
 struct cell_t {
-    /* Pointers to the nodes in the cell */
-    node_t      **node;
-    /* Pointers to the edges in the cell */
-    edge_t      **edge;
     /* Type of the cell. Also tells the number of nodes and edges */
     int         nb_nodes;
+    /* Pointers to the nodes in the cell */
+    node_t      **node;
+    /* Pointers to the edges in the cell (UNUSED) */
+    edge_t      **edge;
     /* Area of the cell (UNUSED) */
     double      area;
 };

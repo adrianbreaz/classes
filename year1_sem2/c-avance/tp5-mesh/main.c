@@ -4,6 +4,7 @@
 #include "mesh.h"
 
 const char basename[] = "./example1/aSquare";
+/* const char basename[] = "./example2/square_circle_hole"; */
 const char dst[] = "example1.vtk";
 
 int main(void)
