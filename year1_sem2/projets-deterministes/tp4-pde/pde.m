@@ -3,7 +3,7 @@ function u = SolvePoisson(f, area, border_func, border_type, N, M)
     %   | -(u_{xx} + u_{yy}) + u = f
     %   | u = u_0                       (Dirichlet boundary condition)
     %   | u_n = g                       (Neumann boundary condition)
-    % known as Poisson equations (for f = 0 we have Laplace equations).
+    % that are a slight modification of Poisson equations.
     %
     % Notation:
     %   u_xx - second derivative on x
@@ -12,7 +12,7 @@ function u = SolvePoisson(f, area, border_func, border_type, N, M)
     % Arguments:
     %   f               given funtion as in the formula.
     %   area            rectangular area [a, b]x[c, d].
-    %   border_func     4 functions for each border.
+    %   border_func     four functions for each border
     %   border_type     type of border condition (0 for Dirichlet and 1 for Neumann).
     %   N               number of discretizations on the x axis
     %   M               number of discretizations on the y axis
@@ -22,12 +22,6 @@ function u = SolvePoisson(f, area, border_func, border_type, N, M)
     %
     % Usage:
     %   u = SolvePoisson(f, area, border_func, border_type, N, M);
-    %
-    % Notes:
-    %   http://web.math.umt.edu/bardsley/courses/412_18/MatlabCode/Poisson2Db.m
-    %   www.public.iastate.edu/~akmitra/aero361/design_web/Laplace.pdf
-    %   www.fstm.ac.ma/labomac/Taik-cours1_AN3.pdf
-    %   http://dissertations.ub.rug.nl/faculties/science/1971/h.j.van.linde/?pLanguage=en&pFullItemRecord=ON
     %
     % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
@@ -42,6 +36,24 @@ function u = SolvePoisson(f, area, border_func, border_type, N, M)
     deltay2 = deltay^2;
     h = 2 * deltax2 + 2 * deltay2 - deltax2 * deltay2;
 
+    % MATRIX NOTATION:
+    %   (x_1, y_M)                                              (x_N, y_M)
+    %     1, M                       Top                           N, M
+    %       ------------------------------------------------------
+    %       |                                                    |
+    %       |                                                    |
+    %       |                                                    |
+    %       |                                                    |
+    %  Left |                                                    |  Right
+    %       |                                                    |
+    %       |                                                    |
+    %       |                                                    |
+    %       |                                                    |
+    %       |                                                    |
+    %       ------------------------------------------------------
+    %   1, 1                        Bottom                       N, 1
+    % (x_1, y_1)                                              (x_N, y_1)
+
     % newly defined functions to make it easier to work with indices
     fn = @(k, l) f(area(1) + k * deltax, area(3) + l * deltay);
     gT = @(k, l) border_func(area(1) + k * deltax, area(3) + l * deltay)(1);
@@ -49,16 +61,42 @@ function u = SolvePoisson(f, area, border_func, border_type, N, M)
     gB = @(k, l) border_func(area(1) + k * deltax, area(3) + l * deltay)(3);
     gL = @(k, l) border_func(area(1) + k * deltax, area(3) + l * deltay)(4);
 
-    % TODO: find out which border is of what type and set the start and end values
-    % correspondingly, i.e. for Dirichlet we skip u(1, j) because it is known
-    si = 1;
-    ei = N;
-    sj = 1;
-    ej = M;
+    % Fill in the respective borders and starting positions in case of Dirichlet
+    % boundary types
+    % TOP
+    u = zeros(N, M)
+    if border_type[1] == 0
+        u(:, M) = border_func(area(1):deltax:area(2), area(4))(1)
+        ej = M - 1
+    else
+        ej = M
+    end
 
-    % TODO: init matrix and fill in the known borders
+    % RIGHT
+    if border_type[2] == 0
+        u(N, :) = border_func(area(2), area(3):deltay:area(4))(2)
+        ei = N - 1
+    else
+        ei = N
+    end
+
+    % BOTTOM
+    if border_type[3] == 0
+        u(:, 1) = border_func(area(1):deltax:area(2), area(3))(3)
+        sj = 2
+    else
+        sj = 1
+    end
+
+    % LEFT
+    if border_type[4] == 0
+        u(1, :) = border_func(area(1), area(3):deltay:area(4))(4)
+        si = 2
+    else
+        si = 1
+    end
+
     % inits
-    u = zeros(N, M);
     u_old = u;
     epsilon = tol;
     it = 0;
