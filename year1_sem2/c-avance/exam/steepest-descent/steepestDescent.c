@@ -33,7 +33,7 @@ double norm(double *V, int size) {
  * return value:
  *  - none
  */
-void ShowVect(double* X, int size) {
+void ShowVect(double *X, int size) {
 	int i = 0;
 
 	for(i = 0; i < size; i++)
@@ -52,8 +52,11 @@ void ShowVect(double* X, int size) {
  *  Output:
  *  - none
  * */
-void MultiplyMatrixByVector(double A[DIM][DIM], const double *x, double *result, int n, int m)
-{
+void MultiplyMatrixByVector(
+        double A[DIM][DIM],
+        const double *x,
+        double *result,
+        int n, int m) {
     int i, j;
 
     for(i = 0; i < n; i++)
@@ -70,43 +73,47 @@ void MultiplyMatrixByVector(double A[DIM][DIM], const double *x, double *result,
  *  - x      - (double *) vector
  *  - y      - (double *) vector
  *  - result - (double *) difference vector
- *  - n      - (int) size of x and y
+ *  - size   - (int) size of x and y
  * Output:
  *  none
  * */
-void SubstractVectors(const double *x, const double *y, double *result, int size)
-{
+void SubstractVectors(
+        const double *x, 
+        const double *y, 
+        double *result, 
+        int size) {
     int i;
 
     for(i = 0; i < size; i++)
         result[i] = x[i] - y[i];
 }
+
 /*
  * this function solve the linear system Ax = b by a steepest descent method
  * arguments :
  *		- A [input]: double[][] array that defines the matrix
  *		- b [input]: (double*) that defines the right term of the system
- *      - xStart [input]: (double*) that defines the starting value of the sequence
+ *      - xStart [input]: (double*) initial value of the sequence
  *      - epsilon [input]: (double) precision threshold
  *      - x[output]: (double*) stores the approximate solution
  *  return value:
  * - none
  */
-void SolveLinearSystem( //
+void SolveLinearSystem(         //
 		double A[DIM][DIM],     /* matrix */
 		const double* b,        /* right term of the system */
 		const double* xStart,   /* first iteration */
 		double epsilon,         /* precision */
-		double* x) {            /* output value: stores the approximate solution */
+		double* x) {            /* output value: approximate solution */
 	int nbStep = 0;
 	double *r = NULL;
-    double *temp_vec = NULL;
+    double *tmp_result = NULL;
     double p, q, alpha;
     int i;
 
     /* allocate vectors and init to 0 */
 	r = calloc(DIM, sizeof(double));
-    temp_vec = calloc(DIM, sizeof(double));
+    tmp_result = calloc(DIM, sizeof(double));
 
 	if (NULL == r) {
 		printf("error.\n");
@@ -120,8 +127,8 @@ void SolveLinearSystem( //
 		printf("performing step = %d norm(r) = %g\n", nbStep, norm(r, DIM));
 
 		/* Compute r = b - Ax */
-        MultiplyMatrixByVector(A, x, temp_vec, DIM, DIM);
-        SubstractVectors(b, temp_vec, r, DIM);
+        MultiplyMatrixByVector(A, x, tmp_result, DIM, DIM);
+        SubstractVectors(b, tmp_result, r, DIM);
 
 		/* Compute alpha = p/q = (r^T r) / (r^T A r)*/
         /*      Compute r^T r */
@@ -130,10 +137,10 @@ void SolveLinearSystem( //
             p += r[i] * r[i];
 
         /*      Compute r^T (A r) */
-        MultiplyMatrixByVector(A, r, temp_vec, DIM, DIM);
+        MultiplyMatrixByVector(A, r, tmp_result, DIM, DIM);
         q = 0.0;
         for(i = 0; i < DIM; i++)
-            q += r[i] * temp_vec[i];
+            q += r[i] * tmp_result[i];
 
         /*      finally alpha */
         alpha = p/q;
@@ -146,5 +153,5 @@ void SolveLinearSystem( //
 	} while (norm(r, DIM) > epsilon);
 
 	free(r);
-    free(temp_vec);
+    free(tmp_result);
 }
