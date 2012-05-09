@@ -1,6 +1,6 @@
-function u = SolveEq(f, area, border_func, border_type, N, M)
+function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     % Simple solver for equations of the type:
-    %   | -(u_{xx} + u_{yy}) + u = f    (1)
+    %   | (u_{xx} + u_{yy}) + u = f    (1)
     %   | u = u_0                       (Dirichlet boundary condition)
     %   | u_n = g                       (Neumann boundary condition)
     %
@@ -10,10 +10,14 @@ function u = SolveEq(f, area, border_func, border_type, N, M)
     %
     % Arguments:
     %   f               given funtion as in the formula.
-    %   area            an array [a, b, c, d] that forms the rectangle: [a, b]x[c, d].
-    %   border_func     four functions for each border arranged in clockwise order
-    %                   starting from the top.
-    %   border_type     type of border condition (0 for Dirichlet and 1 for Neumann),
+    %   area            an array [a, b, c, d] that forms the rectangle: 
+    %                   [a, b]x[c, d].
+    %   gT              function for top border.
+    %   gR              function for right border.
+    %   gB              function for bottom border.
+    %   gL              function for lft border.
+    %   bt              type of border condition (0 for Dirichlet and 1 
+    %                   for Neumann).
     %                   arranged in the same way as border_func.
     %   N               number of discretizations on the x axis.
     %   M               number of discretizations on the y axis.
@@ -22,11 +26,11 @@ function u = SolveEq(f, area, border_func, border_type, N, M)
     %   u               approximated function in the points (x_i, y_j)
     %
     % Usage:
-    %   u = SolveEq(f, area, border_func, border_type, N, M);
+    %   u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M);
     %
     % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
-    if nargin < 6
+    if nargin < 9
         error('Not enough arguments. Use help SolveEq.');
     end
 
@@ -48,19 +52,17 @@ function u = SolveEq(f, area, border_func, border_type, N, M)
     %   1, 1                        Bottom                       N, 1
     % (x_1, y_1)                                              (x_N, y_1)
 
-    % function shortcuts
-    gT = @(x, y) border_func(x, y)(1);      % top
-    gR = @(x, y) border_func(x, y)(2);      % right
-    gB = @(x, y) border_func(x, y)(3);      % bottom
-    gL = @(x, y) border_func(x, y)(4);      % left
-
     % needed values
     deltax = (area(2) - area(1)) / N;
     deltax2 = deltax^2;
     deltay = (area(4) - area(3)) / M;
     deltay2 = deltay^2;
     n_ones = ones(N, 1);
-
+    
+    x = area(1):deltax:area(2) - deltax;
+    y = area(3):deltay:area(4) - deltay;
+    [X, Y] = meshgrid(x, y);
+    
     % we make a discretization of (1) as follows:
     %   u_{xx} ~= (u_{i - 1, j} + u_{i + 1, j} - 2 * u{i, j}) / deltax^2    (2)
     %   u_{yy} ~= (u_{i, j - 1} + u_{i, j + 1} - 2 * u{i, j}) / deltay^2    (3)
@@ -78,14 +80,16 @@ function u = SolveEq(f, area, border_func, border_type, N, M)
     % The goal is to obtain a A * U = b system where:
     %   U = [u_11, ..., u_N1, u_12, ..., u_N2, ..., u_1M, ..., u_NM]
     % and the matrix A is:
-    %       [ D_1   -I_1      0     ...     0  ]
-    %       [-I_2   D_2     -I_1            .  ]
+    %
+    %       [ D_1   -I_1      0      ...    0  ]
+    %       [-I_2    D_2    -I_1            .  ]
     %       [  0   .      .       .         .  ]
-    %  A=   [  .     .      .       .       .  ]
+    %  A =  [  .     .      .       .       .  ]
     %       [  .       .      .       .     .  ]
     %       [  .         .      .       .   0  ]
     %       [  .         -I_2     D_2     -I_1 ]
-    %       [  0     ...   0     -I_2      D_3 ]
+    %       [  0    ...    0     -I_2      D_3 ]
+    %
     % where D_1, D_2, D_3, I_1 and I_2 are NxN matrices defined as follow:
     % TODO: this only works for dirichlet conditions.
     D_1 = diag(n_ones);
@@ -94,13 +98,39 @@ function u = SolveEq(f, area, border_func, border_type, N, M)
     I_1 = -uj * diag(n_ones);
     I_2 = -uj * diag(n_ones);
 
-    % take care of conditions on the left and right boundaries. (this is gonna
-    % be interesting for von Neumann conditions. probably gonna have to rework
-    % the assembley of A because each D_1(1, 1) and D_(N, N) is different.)
+    % take care of conditions on the left and right boundaries.
     D_2(1, 1) = 1;
+    D_2(1, 2) = 0;
     D_2(N, N) = 1;
+    D_2(N, N - 1) = 0;
+    I_1(1, 1) = 0;
+    I_1(N, N) = 0;
+    I_2(1, 1) = 0;
+    I_2(N, N) = 0;
 
+    % construct the matrix A
     A = blktridiag(D_2, -I_2, -I_1, M);
+    
+    % fix the diagonal (A_11 and A_MM)
     A(1:N, 1:N) = D_1;
-    A((N - 1) * M: N * M, (N - 1) * M: N * M) = D_3;
-    full(A)
+    A((N - 1) * M + 1: N * M, (N - 1) * M + 1: N * M) = D_3;
+    
+    % Fix the upper and lower parts (A12 and A_{M, M - 1})
+    A(1:N, N + 1:2 * N) = zeros(N, N);
+    A((N - 1) * M + 1: N * M, (N - 2) * M + 1:(N - 1) * M) = zeros(N, N);
+
+    % construct the result array
+    b = reshape(f(X, Y), N * M, 1);
+    
+    % fix diagonal (top, bottom)
+    b(1:N) = gB(x);
+    b((N - 1) * M + 1: N * M) = gT(x);
+   
+    % fix right and left
+    b(N + 1:N:N * (M - 2) + 1) = select(gL(y), 2:M - 1);
+    b(2 * N:N:N * (M - 1)) = select(gR(y), 2:M - 1);
+    
+    u = A \ b;
+    
+    u = reshape(u, N, M)';
+    
