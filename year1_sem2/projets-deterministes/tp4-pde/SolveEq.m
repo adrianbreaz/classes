@@ -1,8 +1,8 @@
 function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     % Simple solver for equations of the type:
-    %   | (u_{xx} + u_{yy}) + u = f    (1)
+    %   | -(u_{xx} + u_{yy}) + u = f    (1)
     %   | u = u_0                       (Dirichlet boundary condition)
-    %   | u_n = g                       (Neumann boundary condition)
+    %   | u_n = g                       (von Neumann boundary condition)
     %
     % Notation:
     %   u_{xx}  - second derivative on x
@@ -17,7 +17,7 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %   gB              function for bottom border.
     %   gL              function for lft border.
     %   bt              type of border condition (0 for Dirichlet and 1
-    %                   for Neumann).
+    %                   for von Neumann).
     %                   arranged in the same way as border_func.
     %   N               number of discretizations on the x axis.
     %   M               number of discretizations on the y axis.
@@ -58,7 +58,9 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     deltay = (area(4) - area(3)) / M;
     deltay2 = deltay^2;
     n_ones = ones(N, 1);
-
+    DIRICHLET = 0;
+    NEUMANN = 1;
+ 
     x = area(1):deltax:area(2) - deltax;
     y = area(3):deltay:area(4) - deltay;
     [X, Y] = meshgrid(x, y);
@@ -68,16 +70,16 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %   u_{yy} ~= (u_{i, j - 1} + u_{i, j + 1} - 2 * u{i, j}) / deltay^2    (3)
     % where u_{i, j} is an approximation of u(x_i, y_j). Using (2) and (3) we can
     % express (1) as follows:
-    %   (u_{i - 1, j} + u_{i + 1, j} - 2 * u{i, j}) / deltax^2 +
-    %   (u_{i, j - 1} + u_{i, j + 1} - 2 * u{i, j}) / deltay^2 +
+    %   -(u_{i - 1, j} + u_{i + 1, j} - 2 * u{i, j}) / deltax^2 +
+    %   -(u_{i, j - 1} + u_{i, j + 1} - 2 * u{i, j}) / deltay^2 +
     %   u_{i, j} = f_{i, j}
     % where f_{i, j} = f(x_i, y_j). From this equation we can extract the coeff
     % of each term:
-    ui = 1 / deltax2;          % coeff of u_{i - 1, j} and u_{i + 1, j}
-    uj = 1 / deltay2;          % coeff of u_{i, j - 1} and u_{i, j + 1}
-    uij = (deltax2 * deltay2 - 2 * deltax2 - 2 * deltay2) / (deltax2 * deltay2);
+    ui = -1 / deltax2;          % coeff of u_{i - 1, j} and u_{i + 1, j}
+    uj = -1 / deltay2;          % coeff of u_{i, j - 1} and u_{i, j + 1}
+    uij = 1 - 2 * ui - 2 * uj;
 
-    % The goal is to obtain a A * U = b system where:
+    % The goal is to obtain an A * U = b system where:
     %   U = [u_11, ..., u_N1, u_12, ..., u_N2, ..., u_1M, ..., u_NM]
     % and the matrix A is:
     %
@@ -91,23 +93,43 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %       [  0    ...    0     -I_2      D_3 ]
     %
     % where D_1, D_2, D_3, I_1 and I_2 are NxN matrices defined as follow:
-    % TODO: this only works for dirichlet conditions.
-    D_1 = diag(n_ones);
-    D_3 = diag(n_ones);
     D_2 = full(spdiags([ui * n_ones uij * n_ones ui * n_ones], [-1 0 1], N, N));
+    if bt(1) == DIRICHLET   % top
+        D_3 = diag(n_ones);
+    else
+        D_3 = D_2;
+    end
+    
+    if bt(3) == DIRICHLET   % bottom
+        D_1 = diag(n_ones);
+    else
+        D_1 = D_2;
+    end
+    
     I_1 = -uj * diag(n_ones);
     I_2 = -uj * diag(n_ones);
 
     % take care of conditions on the left and right boundaries.
-    D_2(1, 1) = 1;
-    D_2(1, 2) = 0;
-    D_2(N, N) = 1;
-    D_2(N, N - 1) = 0;
-    I_1(1, 1) = 0;
-    I_1(N, N) = 0;
-    I_2(1, 1) = 0;
-    I_2(N, N) = 0;
-
+    if bt(2) == DIRICHLET   % right
+        D_2(N, N) = 1;
+        I_1(N, N) = 0;
+        I_2(N, N) = 0;
+        D_2(N, N - 1) = 0;
+    else
+        I_1(N, N) = 0;
+        I_2(N, N) = 2 * I_2(N, N);
+    end
+    
+    if bt(4) == DIRICHLET    % left
+        D_2(1, 1) = 1;
+        D_2(1, 2) = 0;
+        I_1(1, 1) = 0;
+        I_2(1, 1) = 0;
+    else
+        I_2(1, 1) = 0;
+        I_1(1, 1) = 2 * I_1(1, 1);
+    end
+ 
     % construct the matrix A
     A = blktridiag(D_2, -I_2, -I_1, M);
 
@@ -116,9 +138,14 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     A((N - 1) * M + 1: N * M, (N - 1) * M + 1: N * M) = D_3;
 
     % Fix the upper and lower parts (A12 and A_{M, M - 1})
-    A(1:N, N + 1:2 * N) = zeros(N, N);
-    A((N - 1) * M + 1: N * M, (N - 2) * M + 1:(N - 1) * M) = zeros(N, N);
-
+    if bt(3) == DIRICHLET   % bottom
+        A(1:N, N + 1:2 * N) = zeros(N);
+    end
+    
+    if bt(1) == DIRICHLET   % top
+        A((N - 1) * M + 1: N * M, (N - 2) * M + 1:(N - 1) * M) = zeros(N);
+    end
+    
     % construct the result array
     b = reshape(f(X, Y), N * M, 1);
 
@@ -127,8 +154,8 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     b((N - 1) * M + 1: N * M) = gT(x);
 
     % fix right and left
-    b(N + 1:N:N * (M - 2) + 1) = select(gL(y), 2:M - 1);
-    b(2 * N:N:N * (M - 1)) = select(gR(y), 2:M - 1);
+    b(1:N:N * (M - 1) + 1) = gL(y);
+    b(N:N:N * M) = gR(y);
 
     u = A \ b;
 
