@@ -153,7 +153,9 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
         D_2(1, 2) = -2 / deltax2;
     end
 
-    % construct the matrix A
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %       Construct the matrix A
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     A = blktridiag(D_2, -I_1, -I_1, M);
 
     % fix the diagonal (A_11 and A_MM)
@@ -168,16 +170,18 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     if bt(3) == DIRICHLET   % bottom
         A(1:N, N + 1:2 * N) = zeros(N);
     else   % == NEUMANN
-        A(1:N, N + 1:2 * N) = 2 * I_1;
+        A(1:N, N + 1:2 * N) = -2 * I_1;
     end
 
     if bt(1) == DIRICHLET   % top
-        A((N - 1) * M + 1: N * M, (N - 2) * M + 1:(N - 1) * M) = zeros(N);
+        A((N - 1) * M + 1:N * M, (N - 2) * M + 1:(N - 1) * M) = zeros(N);
     else   % == NEUMANN
-        A((N - 1) * M + 1: N * M, (N - 2) * M + 1:(N - 1) * M) = 2 * I_1;
+        A((N - 1) * M + 1:N * M, (N - 2) * M + 1:(N - 1) * M) = -2 * I_1;
     end
 
-    % construct the result array
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %       Construct the vector b
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     b = reshape(f(X, Y), N * M, 1);
 
     % fix values for borders when y is constant
@@ -209,3 +213,4 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     u = A \ b;
 
     u = reshape(u, N, M)';
+%      full(A)
