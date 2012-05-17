@@ -1,6 +1,13 @@
 clear all;
 close all;
 format short g;
+% This is a small test script for the SolveEq function. This fonction gives
+% numberical solutions for equations of the type:
+%   | -(u_{xx} + u_{yy}) + u = f    (1)
+%   | u = u_0                       (Dirichlet boundary condition)
+%   | u_n = g                       (Neumann boundary condition)
+%
+% Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
 % number of discretizations
 N = 50;      % for x
@@ -8,39 +15,6 @@ M = 50;      % for y
 
 % area [a, b]x[c, d]
 a = [-2 2 -2 2];
-
-% using the function
-u = @(x, y) sin(x .* y);
-
-% we can construct the system
-%   | -(u_{xx} + u_{yy}) + u = f    (1)
-%   | u = u_0                       (Dirichlet boundary condition)
-%   | u_n = g                       (Neumann boundary condition)
-% and deduce the following function:
-f = @(x, y) -(-y.^2 .* sin(x .* y) - x.^2 .* sin(x .* y)) + sin(x .* y);
-
-% DIRICHLET Only (functions are u = g)
-%  gT = @(z) sin(z * a(4));        % top boundary
-%  gR = @(z) sin(z * a(2));        % right boundary
-%  gB = @(z) sin(z * a(3));        % bottom boundary
-%  gL = @(z) sin(z * a(1));        % left boundary
-%  bt = [0 0 0 0];                 % type of boundary (0 - D, 1 - vN)
-
-% NEUMANN Only (the functions are u_x = g or u_y = g)
-%  gT = @(z) z .* cos(z * a(4));        % top boundary
-%  gR = @(z) z .* cos(z * a(2));        % right boundary
-%  gB = @(z) z .* cos(z * a(3));        % bottom boundary
-%  gL = @(z) z .* cos(z * a(1));        % left boundary
-%  bt = [1 1 1 1];                      % type of boundary (0 - D, 1 - vN)
-
-% Mixed
-gT = @(z) z .* cos(z * a(4));       % top boundary
-gR = @(z) sin(z * a(2));            % right boundary
-gB = @(z) z .* cos(z * a(3));       % bottom boundary
-gL = @(z) sin(z * a(1));            % left boundary
-bt = [1 0 1 0];                     % type of boundary (0 - D, 1 - vN)
-
-u_approx = SolveEq(f, a, gT, gR, gB, gL, bt, N, M);
 
 % construct the intervals
 dx = (a(2) - a(1)) / N;
@@ -50,11 +24,41 @@ y1 = a(3):dy:a(4) - dy;
 
 % compute the exact function
 [X, Y] = meshgrid(x1, y1);
-U = u(X, Y);
+
+% function used for testing
+u = @(x, y) sin(x .* y);
+
+% we can construct the system using u as in (1) and deduce the following function:
+f = @(x, y) -(-y.^2 .* sin(x .* y) - x.^2 .* sin(x .* y)) + sin(x .* y);
+
+% DIRICHLET Only (functions are u = g)
+%  gT = @(z) sin(z * a(4));        % top boundary
+%  gR = @(z) sin(z * a(2));        % right boundary
+%  gB = @(z) sin(z * a(3));        % bottom boundary
+%  gL = @(z) sin(z * a(1));        % left boundary
+%  bt = [0 0 0 0];                 % type of boundary (0 - D, 1 - vN), order: T R B L
+
+% NEUMANN Only (the functions are u_n = g)
+%  gT = @(z) z .* cos(z * a(4));
+%  gR = @(z) z .* cos(z * a(2));
+%  gB = @(z) z .* cos(z * a(3));
+%  gL = @(z) z .* cos(z * a(1));
+%  bt = [1 1 1 1];
+
+% Mixed
+gT = @(z) z .* cos(z * a(4));
+gR = @(z) sin(z * a(2));
+gB = @(z) z .* cos(z * a(3));
+gL = @(z) sin(z * a(1));
+bt = [1 0 1 0];
+
+% do all the heavy lifting
+u_approx = SolveEq(f, a, gT, gR, gB, gL, bt, N, M);
+u_exact = u(X, Y);
 
 % pretty pictures
 subplot(1, 2, 1);
-mesh(X, Y, U);
+mesh(X, Y, u_exact);
 shading faceted;
 title('Exact Solution');
 
@@ -63,4 +67,4 @@ mesh(X, Y, u_approx);
 shading faceted;
 title('Approximation');
 
-fprintf('max_error = %g\n', max(max(abs(U - u_approx))));
+fprintf('max_error = %g\n', max(max(abs(u_exact - u_approx))));

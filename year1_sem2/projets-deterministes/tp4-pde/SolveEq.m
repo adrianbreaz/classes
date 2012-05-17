@@ -10,20 +10,21 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %
     % Arguments:
     %   f               given funtion as in the formula.
-    %   area            an array [a, b, c, d] that forms the rectangle:
-    %                   [a, b]x[c, d].
+    %   area            an array [a, b, c, d] that forms the rectangle: [a, b]x[c, d].
     %   gT              function for top border.
     %   gR              function for right border.
     %   gB              function for bottom border.
-    %   gL              function for lft border.
-    %   bt              type of border condition (0 for Dirichlet and 1
-    %                   for von Neumann).
-    %                   arranged in the same way as border_func.
+    %   gL              function for left border.
+    %   bt              array containing the type of each border condition (4 in
+    %                   total) (0 for Dirichlet and 1 for von Neumann).
     %   N               number of discretizations on the x axis.
     %   M               number of discretizations on the y axis.
     %
     % Returns:
-    %   u               approximated function in the points (x_i, y_j)
+    %   u               approximated function in all the points (x_i, y_j) where
+    %                   x_i = a + i * deltax and y_j = c + j * deltay, where
+    %                   i = {1, N}, j = {1, M}, deltax = (b - a) / N and
+    %                   deltay = (d - c) / M.
     %
     % Usage:
     %   u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M);
@@ -52,7 +53,7 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %   1, 1                        Bottom                       N, 1
     % (x_1, y_1)                                              (x_N, y_1)
 
-    % needed values
+    % needed values (mostly for readability)
     deltax = (area(2) - area(1)) / N;
     deltax2 = deltax^2;
     deltay = (area(4) - area(3)) / M;
@@ -64,7 +65,7 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     y = area(3):deltay:area(4) - deltay;
     [X, Y] = meshgrid(x, y);
 
-    % we make a discretization of (1) as follows:
+    % To proceed we will make a discretization of (1) as follows:
     %   u_{xx} ~= (u_{i - 1, j} + u_{i + 1, j} - 2 * u{i, j}) / deltax^2    (2)
     %   u_{yy} ~= (u_{i, j - 1} + u_{i, j + 1} - 2 * u{i, j}) / deltay^2    (3)
     % where u_{i, j} is an approximation of u(x_i, y_j). Using (2) and (3) we can
@@ -79,19 +80,19 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     uij = (1 + 2 * 1 / deltax2 + 2 * 1 / deltay2) .* ones(N, 1);
 
     % For the Dirichlet boundary conditions we already know the values of u_{i, j},
-    % but in the case of von Neumann we also have derivatives and need to
+    % but in the case of von Neumann we have derivatives and need to
     % approximate. As an example of this we take the bottom boundary (j = 1) where
     % we are given a condition of the type:
-    %       u_n = -u_y = -g_B,
+    %       u_n = -u_y = -g^B,
     % we can approximate u_y in the point (i, 1) using:
-    %       u_y = (u_{i, 2} - u_{i, 0}) / 2 * deltay = g^B,
+    %       u_y = (u_{i, 2} - u_{i, 0}) / 2 * deltay = g^B_i,
     % and obtain a value of u_{i, 0}:
-    %       u_{i, 0} = u_{i, 2} + 2 * deltax * g^B_i.         (2)
+    %       u_{i, 0} = u_{i, 2} + 2 * deltax * g^B_i.         (4)
     % From this we can give an approximation of u_{yy} on the bottom boundary (j = 1)
-    % by replacing u_{i, 0} with (2). We get:
+    % by replacing u_{i, 0} with (4). We get:
     %   -(u_{i - 1, 1} + u_{i + 1, 1} - 2 * u{i, 1}) / deltax^2 +
     %   -(2 * u_{i, 2} - 2 * u{i, 1}) / deltay^2 +
-    %   u_{i, 1} = f_{i, 1} - 2 / deltay * g^B_i
+    %   u_{i, 1} = f_{i, 1} - 2 / deltay * g^B_i              (5)
     % The same procedure can be used to obtain formulae for the other boundaries.
 
     % The goal is to obtain an A * U = b system where:
@@ -130,13 +131,14 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     % For von Neumann:
     %   == D_1 and D_3 are equal to D_2 as stated above.
     %   == D_2 doubles it's (1, 2) and (N, N - 1) positions as a result of
-    %   the left and right boundary conditions
+    %   the left and right boundary conditions (see (5))
     %   == I_1 doesn't change
     %   == I_3 and I_2 double the value of the diagonal as a result of the top and
     %   bottom conditions.
     %
     % NOTE: these conditions can be applied any number of boundaries mixing and
     % twisting all we want.
+
     if bt(2) == DIRICHLET   % right
         D_2(N, N) = 1;
         D_2(N, N - 1) = 0;
@@ -158,7 +160,7 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     A = blktridiag(D_2, -I_1, -I_1, M);
 
-    % fix the diagonal (A_11 and A_MM)
+    % fix the diagonal blocks (A_11 and A_MM)
     if bt(3) == DIRICHLET
         A(1:N, 1:N) = n_ones;
     end
@@ -166,7 +168,7 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
         A((N - 1) * M + 1: N * M, (N - 1) * M + 1: N * M) = n_ones;
     end
 
-    % Fix the upper and lower parts (A12 and A_{M, M - 1})
+    % Fix the adjacent blocks (A12 and A_{M, M - 1})
     if bt(3) == DIRICHLET   % bottom
         A(1:N, N + 1:2 * N) = zeros(N);
     else   % == NEUMANN
@@ -197,7 +199,7 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
         b(1:N) = b(1:N) - 2 / deltay * gB(x)';
     end
 
-    % fix right and left
+    % fix right and left, when x is constant
     if bt(2) == DIRICHLET   % right
         b(N:N:N * M) = gR(y);
     else   % == NEUMANN
@@ -213,4 +215,3 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     u = A \ b;
 
     u = reshape(u, N, M)';
-%      full(A)
