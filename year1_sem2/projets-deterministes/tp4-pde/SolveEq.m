@@ -95,11 +95,11 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %   u_{i, 1} = f_{i, 1} - 2 / deltay * g^B_i              (6)
     % The same procedure can be used to obtain formulae for the other boundaries.
 
-    % By defining (4) for each i and j we get a system with N * M unknowns and
-    % N * M equations. The goal is to transform it into matrix form as A * U = b
+    % By defining (4) and (6) for each i and j we get a system with N * M unknowns
+    % and N * M equations. The goal is to transform it into matrix form as A * U = b
     % where:
     %   U = [u_11, ..., u_N1, u_12, ..., u_N2, ..., u_1M, ..., u_NM]
-    % and the matrix A is:
+    % and:
     %
     %       [ D_1   -I_2      0      ...    0  ]
     %       [-I_1    D_2    -I_1            .  ]
@@ -110,8 +110,9 @@ function u = SolveEq(f, area, gT, gR, gB, gL, bt, N, M)
     %       [  .         -I_1     D_2     -I_1 ]
     %       [  0    ...    0     -I_3      D_3 ]
     %
-    % where D_2 and I_1 are NxN matrices defined as follows (all matrices
-    % are dependent on what conditions are imposed at the limits):
+    % where A is a N*MxN*M matrix, U is a N*M vector and D_2 and I_1 are NxN matrices
+    % defined as follows (all matrices are dependent on what conditions are imposed
+    % at the limits):
     D_2 = full(spdiags([ui uij ui], [-1 0 1], N, N));
     I_1 = -diag(uj);
 

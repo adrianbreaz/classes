@@ -9,26 +9,24 @@ format short g;
 %
 % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
-% number of discretizations
+% Number of discretizations
 N = 50;      % for x
 M = 50;      % for y
 
-% area [a, b]x[c, d]
+% Domain [a, b]x[c, d]
 a = [-2 2 -2 2];
 
-% construct the intervals
+% Construct the intervals and discretizations
 dx = (a(2) - a(1)) / N;
 dy = (a(4) - a(3)) / M;
 x1 = a(1):dx:a(2) - dx;
 y1 = a(3):dy:a(4) - dy;
-
-% compute the exact function
 [X, Y] = meshgrid(x1, y1);
 
-% function used for testing
+% Function used for testing
 u = @(x, y) sin(x .* y);
 
-% we can construct the system using u as in (1) and deduce the following function:
+% We can construct the system using u as in (1) and deduce the following function:
 f = @(x, y) -(-y.^2 .* sin(x .* y) - x.^2 .* sin(x .* y)) + sin(x .* y);
 
 % DIRICHLET Only (functions are u = g)
@@ -52,11 +50,11 @@ gB = @(z) z .* cos(z * a(3));
 gL = @(z) sin(z * a(1));
 bt = [1 0 1 0];
 
-% do all the heavy lifting
+% Do all the heavy lifting
 u_approx = SolveEq(f, a, gT, gR, gB, gL, bt, N, M);
 u_exact = u(X, Y);
 
-% pretty pictures
+% Pretty pictures
 subplot(1, 2, 1);
 mesh(X, Y, u_exact);
 shading faceted;
