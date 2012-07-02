@@ -20,7 +20,9 @@ f1 = @(x, b) mod(b * x + c, m);             % exercise 1
 f2 = @(x, p) (floor(p * x) + 1) / p;        % exercise 2
 f3 = @(x, b, p) mod(b * x, m);              % exercise 3
 
-exercise = 44; % Format: first digit - exercise number, second digit - subproblem
+disp('Exercise number format: first digit - exercise number');
+disp('second digit - subproblem number');
+exercise = input('Give exercise number: ');
 
 switch exercise
     case 11
@@ -52,6 +54,7 @@ switch exercise
         % Test the correlation between our PRNG and a uniform distribution.
         x1 = randi(m - 1, 1, n);
         x2 = 0 * x1;
+        corrc = zeros(length(1:4:1021), 1);
         j = 1;
 
         for a = 1:4:1021
@@ -59,20 +62,22 @@ switch exercise
                 x2(i + 1) = f1(x2(i), a);
             end
 
-            corrcoeff(j) = corr(x2, x1);
+            % corrc(j) = corr(x2, x1);      % octave
+            corr = corrcoef(x1, x2);      % matlab
+            corrc(j) = corr(1, 2);
             j = j + 1;
         end
 
-        [minc, ind] = min(abs(corrcoeff));
+        [minc, ind] = min(abs(corrc));
         fprintf('best a ever is %d\n', 1 + 4 * (ind - 1));
 
-        plot(1:length(corrcoeff), corrcoeff, 'r*');
+        plot(corrc, 'r*');
     case 21
         % Test convergence to a U[0, 1] using the discrete uniform distribution
         x = 0:0.01:0.99;
 
         hold on;
-        plot([0, 1], [0, 1], 'r')
+        plot([0, 1], [0, 1], 'r');
         plot(x, f2(x, 16));
         plot(x, f2(x, 32), 'g');
         plot(x, f2(x, 96), 'y');
@@ -99,63 +104,66 @@ switch exercise
         A = A / m;
         A = [9 -6 1] * A;
         cdfplot(A);               % for Octave
-        % plot(ecdf(A));            % for MATLAB
-    case 42
+    case 41
         % Test the Law of Large Numbers that says:
         %   \overline{X}_n \to E[X]
         n = 1024;
-
-        xn = zeros(n, 1);
-        xsum = 0;
-        x0 = 0;
+        
+        xn = randi(m - 1, n, 1);
+        xn2 = zeros(n, 1);
+        xn = cumsum(xn) ./ [1:n]';
 
         for i = 1:n - 1
-            x0 = f1(x0, a);
-            xsum = xsum + x0;
-            xn(i) = xsum / i;
+            xn2(i + 1) = f1(xn2(i), a);
         end
-
+        
+        xn2 = cumsum(xn2) ./ [1:n]';
+        
         hold on;
         plot([0, n], [m / 2, m / 2], 'LineWidth', 2);
-        plot(xn, 'r*');
+        plot(xn, 'r', 'LineWidth', 2);
+        plot(xn2, 'k', 'LineWidth', 2);
         hold off;
     case 43
         % Compute numerically Var(X) by using n * Var(X_n)
         n = 1024;
 
-        xn = zeros(n, 1);
-        xsum = 0;
-        x0 = 0;
+        x = zeros(n, 1);
+        x(1) = randi(m);
 
         for i = 1:n - 1
-            x0 = f1(x0, a);
-            xsum = xsum + x0;
-            xn(i) = xsum / i;
+            x(i + 1) = f1(x(i), a);
         end
 
-        % FIXME: they should be the same
-        fprintf('Var(X1) = %g\n', (m^2 - 1) / 12);
-        fprintf('n * Var(Xn) = %g\n', n * var(xn));
+        fprintf('exact:  Var(X1) = %g\n', (m^2 - 1) / 12);
+        fprintf('approx: Var(X1) = %g\n', var(x));
     case 44
         % Test the central limit theorem
-        % TODO
-        n = 10000;
+        n = 2000;
+        p = 2048;
+        nmeanx = n * m / 2;
+        nstdx = sqrt(n * (m^2 - 1) / 12);
+        
+        xhist = zeros(p, 1);
+        x = zeros(n, 1);
+ 
+        for i = 1:p
+            x(1) = randi(m);
 
-        nn = zeros(n, 1);
-        xsum = 0;
-        x0 = 0;
-        varx = (m^2 - 1) / 12;
-        meanx = m / 2;
-
-        for i = 1:n - 1
-            x0 = f1(x0, a);
-            xsum = xsum + x0;
-            nn(i) = (xsum - i * meanx) / sqrt(i * varx);
+            for j = 1:n - 1
+                x(j + 1) = f1(x(j), a);
+            end
+            xhist(i) = (sum(x) - nmeanx) / nstdx;
         end
-
+        
         hold on;
-        plot(nn);
+        hist(xhist, 64);
         hold off;
+    case 50
+        T = 2^19937 - 1;
+        mean = 25e+06 * 60 * 60 * 24 * 365;
+        
+        fprintf('%.16f\n', mean / T);
     otherwise
         error('Wrong exercise number.\n');
 end
