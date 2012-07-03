@@ -22,7 +22,7 @@ f3 = @(x, b, p) mod(b * x, m);              % exercise 3
 
 disp('Exercise number format:');
 disp(' - first digit - exercise number');
-disp(' - second digit - subproblem number');
+disp(' - second digit - subproblem number (none if it does not have one)');
 exercise = input('Give exercise number: ');
 
 switch exercise
