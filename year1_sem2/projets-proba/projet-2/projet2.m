@@ -10,14 +10,17 @@ n = 10000;                  % number or random numbers
 urand = rand(n, 1);         % random numbers
 
 disp('Exercise number format:');
-disp(' - first digit - exercise number');
-disp(' - second digit - subproblem number');
+disp(' - first digit: exercise number');
+disp(' - second digit: subproblem number (none if it does not have one)');
 exercise = input('Give exercise number: ');
 
 switch exercise
     case 31
         % Test the inversion method on the exponential distribution.
-        lambda = 1.5;
+        fprintf('Test for the exponential distribution.\n');
+        n = input('Give n: ');
+        lambda = input('Give lambda: ');
+        urand = rand(n, 1);
         y = 0:0.01:10;
 
         cdf1 = @(x) 1 - exp(-lambda * x);       % comulative distribution function
@@ -27,13 +30,13 @@ switch exercise
         X = icdf1(urand);
 
         subplot(1, 3, 1);
-        hist(X / n, 64);
+        hist(X / n, 64);                        % empiric PDF
         subplot(1, 3, 2);
-        plot(y, pdf1(y), 'r', 'LineWidth', 2);
+        plot(y, pdf1(y), 'r', 'LineWidth', 2);  % exact PDF
         subplot(1, 3, 3);
         hold on;
-        cdfplot(X);
-        plot(y, cdf1(y), 'r-.');
+        cdfplot(X);                             % empiric CDF
+        plot(y, cdf1(y), 'r-.');                % exact CDF
         hold off;
     case 32
         % Test the Laplace distribution
@@ -113,10 +116,11 @@ switch exercise
 
         X = icdf1(urand);
 
+        lambda
+        alpha
         figure(1)
         subplot(1, 3, 1);
         hist(X / n);
-        axis([0 5 0 3]);
         subplot(1, 3, 2);
         plot(y, pdf1(y), 'r', 'LineWidth', 2);
         subplot(1, 3, 3);
@@ -127,8 +131,11 @@ switch exercise
         hold off;
     case 36
         % Test the Cauchy distribution
-        gamma = 1;
-        x0 = 0;
+        disp('Test for the Cauchy distribution.');
+        n = input('Give n: ');
+        gamma = input('Give gamma: ');
+        x0 = input('Give x0: ');
+        urand = rand(n, 1);
         y = -4:0.01:4;
 
         cdf1 = @(x) 1/pi * atan((x - x0) / gamma) + 0.5;
@@ -139,12 +146,14 @@ switch exercise
 
         subplot(1, 3, 1);
         hist(X / n, 64);
+        axis([-0.04 0.04 0 600]);
         subplot(1, 3, 2);
         plot(y, pdf1(y), 'r', 'LineWidth', 2);
         subplot(1, 3, 3);
         hold on;
         cdfplot(X);
         plot(y, cdf1(y), 'r-.');
+        axis([-4 4 0 1]);
         hold off;
     case 41
         % Test the Bernoulli distribution
@@ -190,29 +199,8 @@ switch exercise
         plot(y, cdf1(y), 'r*');
         hold off;
     case 43
-        % Test the geometric distribution using the Bernoulli distribution.
-        % TODO
-        p = 0.7;
-        y = 1:0.01:10;
-
-        cdf1 = @(x) 1 - (1 - p).^x;
-        icdf1 = @(u) ceil(log(1 - u) / log(1 - p));
-        pdf1 = @(x) (1 - p).^(x - 1) * p;
-
-        X = icdf1(urand);
-
-        subplot(1, 3, 1);
-        hist(X / n, 64);
-        subplot(1, 3, 2);
-        hold on;
-        plot(1:10, pdf1(1:10), 'r*')
-        plot(y, pdf1(y), 'r', 'LineWidth', 1);
-        hold off
-        subplot(1, 3, 3);
-        hold on;
-        cdfplot(X);
-        plot(y, cdf1(y), 'r*');
-        hold off;
+        % Generate a geometric random variable using Bernoulli random variables.
+        disp('Not Implemented.');
     case 52
         p = [0.1 0.1 0.8];
         pc = cumsum(p);
@@ -256,17 +244,88 @@ switch exercise
         plot(y, cdf1(y), 'r');
         hold off;
     case 91
-        disp('Not Implemented');
+        disp('See exercise 31 for values of n = 100, 5000 and lambda = 1.');
     case 92
-        disp('Not Implemented');
+        % Test if the values obtained from our generator belong to the exponential
+        % distribution
+        lambda = 1;
+
+        icdf1 = @(u) -log(1 - u) / lambda;
+        cdf1 = @(x) 1 - exp(-lambda * x);
+
+        X = icdf1(urand);
+        Xsorted = sort(X);
+        Xcdf = cdf1(Xsorted);
+
+        [pval, ks] = kolmogorov_smirnov_test(X, 'exp', lambda); % Octave
+        % [ks, pval] = kstest(X, [Xsorted' Xcdf']); % Matlab
+
+        fprintf('The p-value is: %g (accepted if > 0.05)\n', pval);
     case 93
-        disp('Not Implemented');
+        % Test if the values obtained from our generator belong to the Cauchy
+        % distribution
+        disp('For the comparison regarding the Cauchy generator see exercise 36.');
+        gamma = 1;
+        x0 = 0;
+
+        icdf1 = @(u) x0 + gamma * tan(pi * (u - 0.5));
+        cdf1 = @(x) 1/pi * atan((x - x0) / gamma) + 0.5;
+
+        X = icdf1(urand);
+        Xsorted = sort(X);
+        Xcdf = cdf1(Xsorted);
+
+        [pval, ks] = kolmogorov_smirnov_test(X, 'cauchy_', x0, gamma); % Octave
+        % [ks, pval] = kstest(X, [Xsorted' Xcdf']); % Matlab
+
+        fprintf('The p-value is: %g (accepted if > 0.05)\n', pval);
     case 94
-        disp('Not Implemented');
+        % Test if the values obtained from our generator belong to the geometric
+        % distribution
+        p = 0.5;
+
+        icdf1 = @(u) ceil(log(1 - u) / log(1 - p));
+        cdf1 = @(x) 1 - (1 - p).^x;
+
+        X = icdf1(urand);
+        Xsorted = sort(X);
+        Xcdf = cdf1(Xsorted);
+
+        [pval, ks] = kolmogorov_smirnov_test(X, 'geo', p); % Octave
+        % [ks, pval] = kstest(X, [Xsorted' Xcdf']); % Matlab
+
+        % NOTE: the p-value should be 0 because the distribution is not continuous.
+        fprintf('The p-value is: %g (accepted if > 0.05)\n', pval);
     case 10
-        disp('Not Implemented');
+        % Compare the random variable:
+        %       X_n = \frac{U_1 + .. + U_n - n/2}{\sqrt{n/12}}
+        % with a N(\mu, \sigma^2) distribution, where U_i is a U[0, 1].
+        % More exactly compare their CDFs.
+        mu = 0;
+        sigma = 1;
+
+        y = -3:0.01:3;
+
+        n = 12;
+        X1 = (sum(rand(n, n)) - n/2) / sqrt(n/12);
+
+        n = 6;
+        X2 = (sum(rand(n, n)) - n/2) / sqrt(n/12);
+
+        subplot(2, 1, 1)
+        hold on;
+        cdfplot(X2);
+        plot(y, normcdf(y, mu, sigma), 'r-.');
+        hold off;
+        title('n = 6');
+        subplot(2, 1, 2)
+        hold on;
+        cdfplot(X1);
+        plot(y, normcdf(y, mu, sigma), 'r-.');
+        hold off;
+        title('n = 12');
     otherwise
         fprintf('Wrong exercise number.\n');
         fprintf('Available exercises are:\n');
-        disp([31 32 33 34 35 36 41 42 43 51 52 6  91 92 93 94 10]);
+        disp([31 32 33 34 35 36 41 42 43 52 6  91 92 93 94 10]);
 end
