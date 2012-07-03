@@ -5,6 +5,7 @@ close all;
 %
 % Students:
 %   Alexandru Fikl
+%   Adrian Breaz
 
 n = 10000;                  % number or random numbers
 urand = rand(n, 1);         % random numbers
@@ -17,10 +18,7 @@ exercise = input('Give exercise number: ');
 switch exercise
     case 31
         % Test the inversion method on the exponential distribution.
-        fprintf('Test for the exponential distribution.\n');
-        n = input('Give n: ');
-        lambda = input('Give lambda: ');
-        urand = rand(n, 1);
+        lambda = 1;
         y = 0:0.01:10;
 
         cdf1 = @(x) 1 - exp(-lambda * x);       % comulative distribution function
@@ -116,8 +114,6 @@ switch exercise
 
         X = icdf1(urand);
 
-        lambda
-        alpha
         figure(1)
         subplot(1, 3, 1);
         hist(X / n);
@@ -131,11 +127,8 @@ switch exercise
         hold off;
     case 36
         % Test the Cauchy distribution
-        disp('Test for the Cauchy distribution.');
-        n = input('Give n: ');
-        gamma = input('Give gamma: ');
-        x0 = input('Give x0: ');
-        urand = rand(n, 1);
+        gamma = 1;
+        x0 = 0;
         y = -4:0.01:4;
 
         cdf1 = @(x) 1/pi * atan((x - x0) / gamma) + 0.5;
@@ -167,7 +160,7 @@ switch exercise
         X = icdf1(urand);
 
         subplot(1, 3, 1);
-        hist(X / n, 64);
+        hist(X / n, 2);
         subplot(1, 3, 2);
         plot(y, pdf1(y), 'r', 'LineWidth', 2);
         subplot(1, 3, 3);
@@ -187,7 +180,7 @@ switch exercise
         X = icdf1(urand);
 
         subplot(1, 3, 1);
-        hist(X / n, 64);
+        hist(X / n, length(unique(X)));
         subplot(1, 3, 2);
         hold on;
         plot(y, pdf1(y), 'r*')
@@ -200,7 +193,21 @@ switch exercise
         hold off;
     case 43
         % Generate a geometric random variable using Bernoulli random variables.
-        disp('Not Implemented.');
+        q = 0.3;     % q = 1 - p; p = 0.7
+        X = zeros(n, 1);
+
+        for i = 1:n
+            counter = 0;
+            a = 0;
+
+            while a < q
+                a = rand();
+                counter = counter + 1;
+            end
+            X(i) = counter;
+        end
+
+        cdfplot(X);
     case 52
         p = [0.1 0.1 0.8];
         pc = cumsum(p);
@@ -224,27 +231,40 @@ switch exercise
     case 6
         % Test the Poisson distribution
         lambda = 4;
-        y = 0:20;
+        y = 1:20;
 
-        cdf1 = @(x) gammainc(floor(x + 1), lambda) / factorial(floor(x));
+        cdf1 = @(x) poisscdf(x, lambda);
         icdf1 = @(u) poissinv(u, lambda);
-        pdf1 = @(x) lambda.^x ./ factorial(x) * e^(-lambda);
+        pdf1 = @(x) lambda.^x ./ factorial(x) * exp(-lambda);
 
         X = icdf1(urand);
 
         subplot(1, 3, 1);
-        hist(X / n, 64);
+        hist(X / n, length(unique(X)));
         subplot(1, 3, 2);
-        hold on;
         plot(y, pdf1(y), 'r', 'LineWidth', 1);
-        hold off
         subplot(1, 3, 3);
         hold on;
         cdfplot(X);
         plot(y, cdf1(y), 'r');
         hold off;
     case 91
-        disp('See exercise 31 for values of n = 100, 5000 and lambda = 1.');
+        % Test if our exponential distribution generator is good.
+        lambda = 1;
+        y = 0:0.01:10;
+
+        cdf1 = @(x) 1 - exp(-lambda * x);
+        icdf1 = @(u) -log(1 - u) / lambda;
+
+        X1 = icdf1(rand(100, 1));
+        X2 = icdf1(rand(5000, 1));
+
+        figure(1);
+        hold on;
+        cdfplot(X1);
+        cdfplot(X2);
+        plot(y, cdf1(y), 'r-.');
+        hold off;
     case 92
         % Test if the values obtained from our generator belong to the exponential
         % distribution
@@ -255,47 +275,71 @@ switch exercise
 
         X = icdf1(urand);
         Xsorted = sort(X);
-        Xcdf = cdf1(Xsorted);
+        CDF = [Xsorted cdf1(Xsorted)];
 
-        [pval, ks] = kolmogorov_smirnov_test(X, 'exp', lambda); % Octave
-        % [ks, pval] = kstest(X, [Xsorted' Xcdf']); % Matlab
+        % [pval, ks] = kolmogorov_smirnov_test(X, 'exp', lambda); % Octave
+        [ks, pval] = kstest(X, CDF); % Matlab
 
-        fprintf('The p-value is: %g (accepted if > 0.05)\n', pval);
+        fprintf('The p-value is: %g ((%d) - 0 if accepted)\n', pval, ks);
     case 93
         % Test if the values obtained from our generator belong to the Cauchy
         % distribution
-        disp('For the comparison regarding the Cauchy generator see exercise 36.');
         gamma = 1;
         x0 = 0;
+        y = -4:0.01:4;
 
-        icdf1 = @(u) x0 + gamma * tan(pi * (u - 0.5));
         cdf1 = @(x) 1/pi * atan((x - x0) / gamma) + 0.5;
+        icdf1 = @(u) x0 + gamma * tan(pi * (u - 0.5));
 
+        % test the similarity of the CDF functions
+        X1 = icdf1(rand(100, 1));
+        X2 = icdf1(rand(5000, 1));
+
+        figure(1);
+        hold on;
+        cdfplot(X1);
+        cdfplot(X2);
+        plot(y, cdf1(y), 'r-.');
+        axis([-4 4 0 1]);
+        hold off;
+
+        % Use the Kolmogorov-Smirnov test to get a second opinion
         X = icdf1(urand);
         Xsorted = sort(X);
-        Xcdf = cdf1(Xsorted);
+        CDF = [Xsorted cdf1(Xsorted)];
+        % [pval, ks] = kolmogorov_smirnov_test(X, 'cauchy_', x0, gamma); % Octave
+        [ks, pval] = kstest(X, CDF); % Matlab
 
-        [pval, ks] = kolmogorov_smirnov_test(X, 'cauchy_', x0, gamma); % Octave
-        % [ks, pval] = kstest(X, [Xsorted' Xcdf']); % Matlab
-
-        fprintf('The p-value is: %g (accepted if > 0.05)\n', pval);
+        fprintf('The p-value is: %g ((%d) - 0 if accepted)\n', pval, ks);
     case 94
         % Test if the values obtained from our generator belong to the geometric
         % distribution
         p = 0.5;
+        y = 1:10;
 
-        icdf1 = @(u) ceil(log(1 - u) / log(1 - p));
         cdf1 = @(x) 1 - (1 - p).^x;
+        icdf1 = @(u) ceil(log(1 - u) / log(1 - p));
 
+        X1 = icdf1(rand(100, 1));
+        X2 = icdf1(rand(5000, 1));
+
+        figure(1)
+        hold on;
+        cdfplot(X1);
+        cdfplot(X2);
+        plot(y, cdf1(y), 'r*');
+        hold off;
+
+        % Perform similarity test using KS
         X = icdf1(urand);
         Xsorted = sort(X);
-        Xcdf = cdf1(Xsorted);
+        CDF = [Xsorted cdf1(Xsorted)];
 
-        [pval, ks] = kolmogorov_smirnov_test(X, 'geo', p); % Octave
-        % [ks, pval] = kstest(X, [Xsorted' Xcdf']); % Matlab
+        %[pval, ks] = kolmogorov_smirnov_test(X, 'geo', p); % Octave
+         [ks, pval] = kstest(X, CDF); % Matlab
 
         % NOTE: the p-value should be 0 because the distribution is not continuous.
-        fprintf('The p-value is: %g (accepted if > 0.05)\n', pval);
+        fprintf('The p-value is: %g  ((%d) - 0 if accepted)\n', pval, ks);
     case 10
         % Compare the random variable:
         %       X_n = \frac{U_1 + .. + U_n - n/2}{\sqrt{n/12}}
