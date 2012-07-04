@@ -196,5 +196,5 @@ switch exercise
     otherwise
         fprintf('Wrong exercise number.\n');
         fprintf('Available exercises are:\n');
-        disp([11 12 13 14 15 2 4 5 6 7 8]);
+        disp([15 2 4 5 6 7 8]);
 end

@@ -51,6 +51,56 @@ switch exercise
         
         fprintf('3. Monte Carlo %g.\n', mean(f(X)));
         fprintf('   Variance: %g\n', var(X.^2 + (2 - X).^2));
+    case 41
+        gamma = 1;
+        x0 = 0;
+        n = 10000;
+        X = rand(n, 1);
+        
+        icdf1 = @(u) x0 + gamma * tan(pi * (u - 0.5));
+        
+        X = icdf1(X);
+        f = @(x) x >= 2;
+        meanx = mean(f(X));
+        varx = var(f(X));
+        lower = meanx - normcdf(0.95) * sqrt(varx / n);
+        upper = meanx + normcdf(0.95) * sqrt(varx / n);
+        
+        fprintf('E[X] %g.\n', meanx);
+        fprintf('Var[X]: %g\n', varx);
+        fprintf('p in [%g, %g]\n', lower, upper);
+    case 42
+        gamma = 1;
+        x0 = 0;
+        n = 10000;
+        X = rand(n, 1);
+        
+        icdf1 = @(u) x0 + gamma * tan(pi * (u - 0.5));
+        f = @(x) ((x >= 2) + (x <= -2)) / 2;
+        
+        X = icdf1(X);
+        meanx = mean(f(X));
+        varx = var(f(X));
+        lower = meanx - normcdf(0.95) * sqrt(varx / n);
+        upper = meanx + normcdf(0.95) * sqrt(varx / n);
+        
+        fprintf('E[X] %g.\n', meanx);
+        fprintf('Var[X]: %g\n', varx);
+        fprintf('p in [%g, %g]\n', lower, upper);
+    case 43
+        n = 10000;
+        X = 2 * rand(n, 1);
+        f = @(x) 2 ./ (pi * (1 + x.^2));
+        
+        fprintf('p = %g.\n', 0.5 - mean(f(X)));
+        fprintf('Var[X]: %g\n', var(f(X)));
+    case 44
+        n = 10000;
+        X = 0.5 * rand(n, 1);
+        f = @(x) 0.5 * x.^(-2) ./ (pi * (1 + x.^(-2)));
+        
+        fprintf('p = %g.\n', mean(f(X)));
+        fprintf('Var[X]: %.10f\n', var(f(X)));
     otherwise
         fprintf('Wrong exercise number.\n');
         fprintf('Available exercises are:\n');
