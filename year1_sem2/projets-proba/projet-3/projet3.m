@@ -253,10 +253,10 @@ switch exercise
         subplot(2, 1, 2)
         hold on;
         plot(X, Y, 'r*');
-        plot([-2 -1.009 -1.009 -2], [0 0 1 0], 'b', 'LineWidth', 3);
+        plot([-2 -1 -1 -2], [0 0 1 0], 'b', 'LineWidth', 3);
         plot([-1 0 0 -1 -1], [0 0 1 2 0], 'k', 'LineWidth', 3);
-        plot([0.009 1 1 0.009 0.009], [0 0 2 1 0], 'b', 'LineWidth', 3);
-        plot([1.009 2 1.009 1.009], [0 0 1 0], 'k', 'LineWidth', 3);
+        plot([0 1 1 0 0], [0 0 2 1 0], 'b', 'LineWidth', 3);
+        plot([1 2 1 1], [0 0 1 0], 'k', 'LineWidth', 3);
         hold off
     otherwise
         fprintf('Wrong exercise number.\n');
