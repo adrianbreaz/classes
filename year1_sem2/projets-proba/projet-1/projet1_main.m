@@ -22,6 +22,7 @@ m = 1024;
 n = 20;
 x0 = 0;
 
+disp([11 12 14 21 33 41 43 44]);
 exercise = input('Give exercise number: ');
 
 switch exercise
@@ -37,17 +38,17 @@ switch exercise
         hold off;
     case 12
         % Find the period of our LCG
-        T = 0;                      % period counter
+        p = 0;                      % period counter
         x1 = mod(a * x0 + c, m);    % next value
 
         while x1 ~= 0
             x1 = mod(a * x0 + c, m);
             x0 = x1;
-            T = T + 1;
+            p = p + 1;
         end
 
         fprintf('For (x0 = %d, a = %d, c = %d, m = %d) ', x0, a, c, m);
-        fprintf('the period of the LCG for is: %d\n', T);
+        fprintf('the period of the LCG for is: %d\n', p);
     case 14
         % Test the correlation between the LCG and a uniform distribution.
         %
@@ -67,10 +68,9 @@ switch exercise
         end
 
         % We want to find the `a` for which the two variables X1 and X2 are
-        % the most decorrelated (the correlation is very close to 0). This means
-        % that our generator is not uniform, but at least slightly `random`.
+        % the most decorrelated (the correlation is very close to 0).
         [minc, ind] = min(abs(CORR));
-        fprintf('best a ever is %d with a corr of %g\n', A(ind), CORR(ind));
+        fprintf('best a ever is %d with a corr of %g\n', A(ind), minc);
 
         hold on;
         plot(A, CORR, 'r*');
@@ -117,13 +117,14 @@ switch exercise
         hold off
     case 41
         % Test the Law of Large Numbers that says:
-        %   \overline{X}_n \to E[X]
+        %   \overline{X}_n \to E[X_1]
+        % where \overline{X}_n is the empiric mean.
         n = 1024;
 
-        % Compute the empiric mean of a uniform random variable for different n
+        % Compute the empiric mean of a uniform random variable for different n.
         Xn_unif = cumsum(randi(m - 1, n, 1)) ./ [1:n]';
 
-        % Compute the empiric mean of a variable generated using the LCG for different n
+        % Compute the empiric mean of a variable generated using the LCG for different n.
         Xn_lcg = cumsum(lcg(x0, a, c, m, n)) ./ [1:n]';
 
         hold on;
@@ -134,17 +135,18 @@ switch exercise
         title('Convergence to the uniform distribution mean');
         hold off;
     case 43
-        % Compute numerically Var(X) where X is generated using the LCG
+        % Compute Var(X) numerically where X is generated using the LCG
         n = 1024;
         X = lcg(randi(m), a, c, m, n);
 
+        % As X is a U[0, 1] they should be the same-ish.
         fprintf('exact:  Var(X) = %g\n', (m^2 - 1) / 12);
         fprintf('approx: Var(X) = %g\n', var(X));
     case 44
         % Test the Central Limit Theorem:
         %   (X_1 + ... + X_n - n * E[X_1]) / \sqrt{n * Var[X]} --> N(0, 1)
         %
-        % To test this we fix an `n`, and generated X_1, ..., X_n `p` times and see
+        % To test this we fix an `n`, and generate (X_1, ..., X_n) `p` times and see
         % if the results are normally distributed.
         n = 128;
         p = 512;
@@ -153,16 +155,14 @@ switch exercise
         nmeanx = n * m / 2;                 % n * E[X]
         nstdx = sqrt(n * (m^2 - 1) / 12);   % \sqrt{n * Var[X]}
 
-        xhist = zeros(p, 1);
+        Z = zeros(p, 1);
 
         for i = 1:p
             x = sum(lcg(randi(m), a, c, m, n)); % generate an array from the LCG
-            xhist(i) = (x - nmeanx) / nstdx;    % normalize it
+            Z(i) = (x - nmeanx) / nstdx;        % normalize it
         end
 
-        histfit(xhist, 64);
+        histfit(Z, 64);
     otherwise
         fprintf('Wrong exercise number.\n');
-        fprintf('Available exercises are:\n');
-        disp([11 12 14 21 33 41 43 44]);
 end
