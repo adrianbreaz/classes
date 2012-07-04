@@ -16,6 +16,8 @@ function [x] = randu(x0, n)
     % Usage:
     %   x = randu(x0[, n]);
     %
+    % NOTE: Widely considered as one of the most ill-conceived PRNG around.
+    %
     % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
     if nargin < 1
@@ -26,13 +28,13 @@ function [x] = randu(x0, n)
         n = 100;
     end
 
+    % The RANDU algorithm works only with an odd seed for obvious reasons.
+    if mod(x0, 2) == 0
+        x0 = x0 + 1;
+    end
+
     a = 2^16 + 2 + 1;
     c = 0;
     m = 2^31;
 
-    x = zeros(n, 1);
-    x(1) = mod(a * x0 + c, m);
-
-    for i = 1:n - 1
-        x(i + 1) = mod(a * x(i) + c, m);
-    end
+    x = lcg(x0, a, c, m, n);
