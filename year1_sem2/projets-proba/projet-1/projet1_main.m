@@ -59,7 +59,7 @@ switch exercise
         % Initialize our random variables
         X1 = randi(m - 1, n, 1);
         X2 = 0 * X1;
-        CORR = zeros(length(A), 1);
+        CORR = 0 * A;
 
         for a = A
             X2 = lcg(x0, a, c, m, n);
@@ -74,7 +74,7 @@ switch exercise
 
         hold on;
         plot(A, CORR, 'r*');
-        plot([0, 1025], [0, 0]);
+        plot([(A(1) - 1) (A(end) + 1)], [0 0]);
         xlabel('a');
         ylabel('Correlation');
         title('Correlation between a uniform distribution and our linear random number generator.')
@@ -89,7 +89,7 @@ switch exercise
 
         X = 0:0.01:0.99;
 
-        % For various values of m we can see how converges to a U[0, 1] distribution.
+        % For various values of m we can see how it converges to U[0, 1].
         hold on;
         plot([0, 1], [0, 1], 'r');
         plot(X, f(X, 16));
