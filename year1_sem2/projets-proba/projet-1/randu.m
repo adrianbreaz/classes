@@ -28,7 +28,7 @@ function [x] = randu(x0, n)
         n = 100;
     end
 
-    % The RANDU algorithm works only with an odd seed for obvious reasons.
+    % The RANDU algorithm works better with an odd seed for obvious reasons.
     if mod(x0, 2) == 0
         x0 = x0 + 1;
     end
