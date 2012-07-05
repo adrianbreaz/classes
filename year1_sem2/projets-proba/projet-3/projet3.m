@@ -1,74 +1,79 @@
 close all;
 clear all;
 
-% Project 3.
+% Project 3: Acceptance-rejection method. Distribution decomposition.
 %
 % Students:
 %   Adrian Breaz
 %   Alexandru Fikl
+%
+% Description: http://en.wikipedia.org/wiki/Rejection_sampling :
+%   - sample x from g(x) and u from U[0, 1]
+%   - check if f(x) < u * M * g(x)
+%   - if yes, accept x as a realisation of f
+%   - if not, try again
+%
+% Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
 
 n = 2500;
-X = rand(n, 1);
-Y = rand(n, 1);
 
-disp('Exercise number format:');
-disp(' - first digit: exercise number');
-disp(' - second digit: subproblem number (none if it does not have one)');
+disp([2 3 4 5 6 7 9 10]);
 exercise = input('Give exercise number: ');
 
 switch exercise
     case 2
-        lambda = 1;         % value for which c_{\lambda} is minimal
+        % We simulate a normal variable using an exponential variable which we
+        % know how to generate using the inverse method.
+        %
+        % g(x) = lambda * exp(-lambda * x) and the best lambda is:
+        lambda = 1;
 
-        cdfexp = @(x) lambda * exp(-lambda * x);
-        icdfexp = @(x) -log(1 - x)/ lambda;
-        cdfnorm = @(x) sqrt(pi/2) * exp(-x^2/2);
+        % the required functions
+        cdfexp = @(x, y) y * lambda * exp(-lambda * x);         % g
+        icdfexp = @(x) -log(1 - x)/ lambda;                     % g^-1
+        cdfnorm = @(x, y) sqrt(pi/2) * exp(-x^2/2);             % f
+
+        % the required c (minimizes f/g)
         c = sqrt(2 / pi) * exp(lambda^2 / 2) / lambda;
 
-        % Create a random variable using the exponential and Thm 1
-        for i = 1:n
-            U = rand();
-            x = icdfexp(rand());
-            const = 2 * randi([0, 1]) - 1;
-            j = 1;
+        % get an array of normally distributed variables on [0, inf]
+        X = acceptreject(cdfnorm, cdfexp, icdfexp, c, [0 1 0 1], n);
 
-            while cdfnorm(x) <= (U * c * cdfexp(x))
-                U = rand();
-                x = icdfexp(rand());
-                j = j + 1;
-            end
+        % with a probability of 0.5 make it symmetric
+        X = (-1).^(randi([0, 1], n, 1)) .* X;
 
-            Y(i) = x * const;
-            I(i) = j;
-        end
-
-        fprintf('The mean is %d\n', mean(I));
-        cdfplot(Y);
+        % plot the result
+        hold on;
+        cdfplot(X);
+        h = cdfplot(norminv(rand(n, 1)));
+        set(h, 'Color', 'r');
+        legend('Approximation', 'Normal Distribution');
+        title('Simulate a normally distributed variable');
+        hold off
     case 3
         % Generate (X, Y) uniformly on a square [0, 1]x[0, 1]
+        f = @(x, y) 2;
+        g = @(x, y) x + y;
+        grand = @(x) x;
+
+        [X, Y] = acceptreject(f, g, grand, 1, [0 1 0 1], n);
+
         hold on;
         plot(X, Y, 'r*');
-        plot([0 1 1 0 0], [0 0 1 1 0], 'LineWidth', 3);
+        plot([0 1 1 0 0], [0 0 1 1 0], 'LineWidth', 3); % draw the square boundaries
         hold off;
     case 4
         % Generate (X, Y) uniformly on a triangle (0, 0), (1, 0), (0, 1)
-        for i = 1:n
-            x = rand();
-            y = rand();
+        f = @(x, y) 1;
+        g = @(x, y) x + y;
+        grand = @(x) x;
 
-            while (x + y) > 1
-                x = rand();
-                y = rand();
-            end
-
-            X(i) = x;
-            Y(i) = y;
-        end
+        [X, Y] = acceptreject(f, g, grand, 1, [0 1 0 1], n);
 
         hold on;
         plot(X, Y, 'r*');
-        plot([0 1 0 0], [0 0 1 0], 'LineWidth', 3);
+        plot([0 1 0 0], [0 0 1 0], 'LineWidth', 3); % draw the triangle boundaries
         hold off
     case 5
         % Generate (X, Y) uniformly on the unit disk
@@ -77,29 +82,23 @@ switch exercise
         b = -1;
         r = 1;      % radius
 
-        for i = 1:n
-            x = a + (b - a) * rand();
-            y = a + (b - a) * rand();
+        g = @(x, y) x.^2 + y.^2;
+        f = @(x, y) r;
+        grand = @(x) x;
 
-            while (x^2 + y^2) > r
-                x = a + (b - a) * rand();
-                y = a + (b - a) * rand();
-            end
-
-            X(i) = x;
-            Y(i) = y;
-        end
+        [X, Y] = acceptreject(f, g, grand, 1, [a b a b], n);
 
         hold on;
         plot(X, Y, 'r*');
-        plot(r * cos(0:pi/100:2 * pi), r * sin(0:pi/100:2 * pi), 'LineWidth', 3);
+        plot(r * cos(linspace(0, 2 * pi, 100)), r * sin(linspace(0, 2 * pi, 100)), 'LineWidth', 3);
         hold off;
     case 6
         % Generate (X, Y) uniformly in the set:
         %   D_f = {(x, y) \in R^2: 0 <= y <= f(x)}
         % for a given f.
-        f = @(x) 3 * x.^2;
-        Z = linspace(0, 1, 100);
+        f = @(x, y) 3 * x.^2;
+        g = @(x, y) y;
+        grand = @(x) x;
 
         % limits of x
         a = 1;
@@ -109,27 +108,18 @@ switch exercise
         c = 3;
         d = 0;
 
-        for i = 1:n
-            x = a + (b - a) * rand();
-            y = c + (d - c) * rand();
-
-            while y > f(x)
-                x = a + (b - a) * rand();
-                y = c + (d - c) * rand();
-            end
-
-            X(i) = x;
-            Y(i) = y;
-        end
+        [X, Y] = acceptreject(f, g, grand, 1, [a b c d], n);
+        Z = linspace(0, 1, 100);
 
         hold on;
         plot(X, Y, 'r*');
-        plot(Z, f(Z), 'LineWidth', 3);
+        plot(Z, f(Z, 0), 'LineWidth', 3);   % draw the function
         hold off;
      case 7
         % Generate X with the density f.
-        f = @(x) 2 * sqrt(1 - x.^2) / pi;
-        g = @(x) 0.5;
+        f = @(x, y) 2 * sqrt(1 - x.^2) / pi;
+        g = @(x, y) y * 0.5;
+        grand = @(x) x;
 
         c =  4/pi;
 
@@ -137,22 +127,8 @@ switch exercise
         a = 1;
         b = -1;
 
-        for i = 1:n
-            U = rand();
-            y = a + (b - a) * rand();
-            j = 1;
+        [X, Y] = acceptreject(f, g, grand, c, [a b 0 1], n);
 
-            while f(y) <= (U * c * g(y))
-                U = rand();
-                y = a + (b - a) * rand();
-                j = j + 1;
-            end
-
-            X(i) = y;
-            Y(i) = j;
-        end
-
-        mean(y);
         subplot(2, 1, 1)
         hist(X, 20);
         subplot(2, 1, 2)
@@ -163,24 +139,13 @@ switch exercise
         %              1/150    if k is odd
         % for k in {1, ..., 100}.
         n = 10000;
-        X = zeros(n, 1);
-        U = randi(100);
         c = 4/3;
 
-        p = @(k) 1/100;
-        q = @(k) (1 + mod(k + 1, 2)) / 150;     % the PDF
+        f = @(x, y) (1 + mod(x + 1, 2)) / 150;     % the PDF
+        g = @(x, y) y * 1/100;
+        grand = @(x) round(99 * x + 1);
 
-        for i = 1:n
-            k = randi(100);
-            U = rand(1, 1);
-
-            while q(k) <= (U * c * p(k))
-                k = randi(100);
-                U = rand();
-            end
-
-            X(i) = k;
-        end
+        X = acceptreject(f, g, grand, c, [0 1 0 1], n);
 
         hist(X, 100);
     case 10
@@ -230,6 +195,7 @@ switch exercise
             k = randi(4);
             U = rand();
 
+            % pick a region
             while q(k) <= (U * c * p)
                 k = randi(4);
                 U = rand();
@@ -238,6 +204,7 @@ switch exercise
             x = xa(k) + (xb(k) - xa(k)) * rand();
             y = ya(k) + (yb(k) - ya(k)) * rand();
 
+            % pick a point in the region
             while y > (a1(k) * x + a2(k))
                 x = xa(k) + (xb(k) - xa(k)) * rand();
                 y = ya(k) + (yb(k) - ya(k)) * rand();
@@ -260,6 +227,4 @@ switch exercise
         hold off
     otherwise
         fprintf('Wrong exercise number.\n');
-        fprintf('Available exercises are:\n');
-        disp([2 3 4 5 6 7 9 10]);
 end
