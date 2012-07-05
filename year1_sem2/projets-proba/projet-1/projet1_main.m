@@ -8,8 +8,7 @@ format short g;
 %   Alexandru Fikl
 %   Buchra Abouali
 %
-% Description:
-%   Test linear congruencial generators that are defined as follows:
+% Description: test linear congruencial generators that are defined as follows:
 %   - given a function f(x) = a * x + c mod m and a starting value x_0
 %   - iterate x_{n + 1} = f(x_n) for number of times.
 %

@@ -205,6 +205,7 @@ switch exercise
         plot(y, normcdf(y, mu, sigma), 'r-.');
         hold off;
         title('n = 6');
+
         subplot(2, 1, 2)
         hold on;
         cdfplot(X1);
