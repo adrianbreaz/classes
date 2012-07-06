@@ -9,9 +9,9 @@ function [X, Y] = acceptreject(f, g, grand, c, domain, n)
     %   - c     (integer): the constant that makes the relation f < c * g true.
     %   - n     (integer): number of samples.
     %
-    % Usage:
+    % Usage: This will generate a normal distribution on [0, 1]:
     %   c = sqrt(2 / pi) * exp(lambda^2 / 2) / lambda;
-    %   x = rejectaccept(normcdf, expcdf, expinv, c, [0, 1]);
+    %   x = rejectaccept(normcdf, expcdf, expinv, c, [0 1 0 1], 10000);
     %
     % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 

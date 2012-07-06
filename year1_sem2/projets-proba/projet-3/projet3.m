@@ -1,7 +1,7 @@
 close all;
 clear all;
 
-% Project 3: Acceptance-rejection method. Distribution decomposition.
+% Project 3: Acceptance-rejection method.
 %
 % Students:
 %   Adrian Breaz
@@ -23,7 +23,7 @@ exercise = input('Give exercise number: ');
 
 switch exercise
     case 2
-        % We simulate a normal variable using an exponential variable which we
+        % Simulate a normal variable using an exponential variable which we
         % know how to generate using the inverse method.
         %
         % g(x) = lambda * exp(-lambda * x) and the best lambda is:
