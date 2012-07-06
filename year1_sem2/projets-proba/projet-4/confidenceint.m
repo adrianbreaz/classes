@@ -16,6 +16,8 @@ function [lower, upper, mu] = confidenceint(X, alpha)
     %
     % Usage:
     %   [l, u, mu] = confidenceint(rand(100, 1), 0.05);
+    %
+    % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
     % needed values
     sigma = var(X);                 % variance

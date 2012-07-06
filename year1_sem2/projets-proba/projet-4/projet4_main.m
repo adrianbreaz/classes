@@ -1,7 +1,8 @@
 clear all;
 close all;
+addpath('../projet-3');
 
-% Project 4: Monte Carlo and Confidance Intervals.
+% Project 4: Monte Carlo and Confidence Intervals.
 %
 % Students:
 %   Alexandru Fikl
@@ -32,145 +33,82 @@ switch exercise
 
         e = linspace(0, 3, 512);
 
-        % Each of the 3 limits provides a upper boudnary for some interval of epsilon.
+        % Each of the 3 limits provides a upper boundary for some interval of epsilon.
         hold on;
         plot(e, limitbc(e));
         plot(e, limith(e), 'r');
         plot(e, limitclt(e), 'k');
         legend('Chebychev', 'Hoeffding', 'CLT');
         hold off;
-    case 4
+    case 41
+        % Determine the confidence interval for different values of alpha
         n = 100;        % number of samples
         emu = 0.5;      % exact mean of U[0, 1]
 
-        xrand = randn(n, 1);
+        xrand = rand(n, 1);
 
         fprintf('%15s%15s%15s%15s%15s\n', 'Mean', 'Error', 'Lower', 'Upper', 'Confidence');
         for a = [0.05 0.025 0.01 0.005 0.0005]
             [lower, upper, mu] = confidenceint(xrand, a);
             fprintf('%15g%15g%15g%15g%15g\n', mu, emu - mu, lower, upper, 1 - a);
         end
+    case 42
+        % Plot the confidence interval for different values of n
+        a = 0.05;
+        emean = 0.5;
 
-        a = 0.005;
-        narr = 1000:500:10000;
-        lower = zeros(length(narr), 1);
-        upper = zeros(length(narr), 1);
-        meanx = zeros(length(narr), 1);
-        i = 1;
-        for n = narr
-            ci = conf_interval(randn(n, 1), meanexact, a);
-            meanx(i) = ci(1);
-            lower(i) = ci(3);
-            upper(i) = ci(4);
-            i = i + 1;
-        end
-
-        hold on;
-        errorbar(narr, meanx, meanx - lower, upper - meanx, 'o');
-        plot(narr, meanx, 'r', 'LineWidth', 2);
-        plot([narr(1) narr(end)], [meanexact meanexact], 'k');
-        hold off;
+        plot_ci(a, 1000:500:10000, @(x) x, emean);
+        title(sprintf('alpha = %g', a));
     case 5
-        meanexact1 = 1;
-        meanexact2 = 0.94281;
-        meanexact3 = -0.30685;
-        conf_interval = @(x, xmean, alpha) [mean(x) abs(xmean - mean(x)) (mean(x) - normcdf(1 - alpha/2) * sqrt(var(x)/length(x))) (mean(x) + normcdf(1 - alpha/2) * sqrt(var(x)/length(x)))];
+        % Given X ~ U[0, 2]. Estimate the means of X, sqrt(X) and log(X)
+
+        % Exact means of those variables
+        meanx = 1;
+        meansqrtx = 0.94281;
+        meanlogx = -0.30685;
 
         a = 0.05;
-        narr = 1000:500:10000;
-        lower = zeros(length(narr), 1);
-        upper = zeros(length(narr), 1);
-        meanx = zeros(length(narr), 1);
-        i = 1;
-        for n = narr
-            ci = conf_interval(2 * rand(n, 1), meanexact1, a);
-            meanx(i) = ci(1);
-            lower(i) = ci(3);
-            upper(i) = ci(4);
-            i = i + 1;
-        end
+        nvalues = 1000:500:10000;
 
         subplot(3, 1, 1);
-        hold on;
-        errorbar(narr, meanx, meanx - lower, upper - meanx, 'o');
-        plot(narr, meanx, 'r', 'LineWidth', 2);
-        plot([narr(1) narr(end)], [meanexact1 meanexact1], 'k');
+        plot_ci(a, nvalues, @(x) 2 * x, meanx);
         title('Mean of X');
-        hold off;
-
-        i = 1;
-        for n = narr
-            ci = conf_interval(sqrt(2 * rand(n, 1)), meanexact2, a);
-            meanx(i) = ci(1);
-            lower(i) = ci(3);
-            upper(i) = ci(4);
-            i = i + 1;
-        end
-
         subplot(3, 1, 2);
-        hold on;
-        errorbar(narr, meanx, meanx - lower, upper - meanx, 'o');
-        plot(narr, meanx, 'r', 'LineWidth', 2);
-        plot([narr(1) narr(end)], [meanexact2 meanexact2], 'k');
+        plot_ci(a, nvalues, @(x) sqrt(2 * x), meansqrtx);
         title('Mean of sqrt(X)');
-        hold off;
-
-        i = 1;
-        for n = narr
-            ci = conf_interval(log(2 * rand(n, 1)), meanexact3, a);
-            meanx(i) = ci(1);
-            lower(i) = ci(3);
-            upper(i) = ci(4);
-            i = i + 1;
-        end
-
         subplot(3, 1, 3);
-        hold on;
-        errorbar(narr, meanx, meanx - lower, upper - meanx, 'o');
-        plot(narr, meanx, 'r', 'LineWidth', 2);
-        plot([narr(1) narr(end)], [meanexact3 meanexact3], 'k');
-        title('Mean log(X)');
-        hold off;
+        plot_ci(a, nvalues, @(x) log(2 * x), meanlogx);
+        title('Mean of log(X)');
     case 6
         n = 10000;
-        X = 2 * rand(n, 1);
-        Y = 8 * rand(n, 1) + 2;
 
+        % First integral
         f = @(x, y) 16 ./ (y.^2 + cos(x).^2);
+
+        reject_func = @(x, y) 0;
+        [X, Y] = acceptreject(reject_func, @(x) x, [0 2 2 10], n);
+
         fprintf('value of the first integral is %g.\n', mean(f(X, Y)));
 
-        icdfexp = @(u) -log(1 - u) / 2;
-        X = icdfexp(rand(n, 1));
-        Y = 2 * rand(n, 1) + 1;
-        g = @(x, y) 1 ./ (2 * (Y + cos(X.*Y)));
+        % Second integral
+        % FIXME: should give 0.26...
+        g = @(x, y) 1 ./ (2 * (Y + cos(X .* Y)));
+
+        reject_func = @(x, y) 0;
+        icdfexp = @(x) -log(1 - x) / 2;
+        [X, Y] = acceptreject(reject_func, icdfexp, [0 1 1 2], n);
         fprintf('value of the second integral is %g.\n', mean(g(X, Y)));
     case 7
-        n = 10000;
-        X = zeros(n, 1);
-        Y = zeros(n, 1);
+        % Compute the integral of e^{(x - y) / (x + y)} on the domain:
+        %   D = { (x, y): x, y > 0, 0.5 < x + y < 1 }
+        % using the Monte Carlo method.
+        n = 1000;
+        f = @(x, y) 2.6666 * exp((x - y) ./ (x + y));
 
-        f = @(x) 0.5 - x;
-        g = @(x) 1 - x;
-        h = @(x, y) 2.6666 * exp((x - y) ./ (x + y));
-        a = 0;
-        b = 1;
-        c = 0;
-        d = 1;
+        reject_func = @(x, y) y < (0.5 - x) || y > (1 - x);
+        [X, Y] = acceptreject(reject_func, @(x) x, [0 1 0 1], n);
 
-        for i = 1:n
-            x = a + (b - a) * rand();
-            y = c + (d - c) * rand();
-
-            while y < f(x) || y > g(x)
-                x = a + (b - a) * rand();
-                y = c + (d - c) * rand();
-            end
-
-            X(i) = x;
-            Y(i) = y;
-        end
-
-        fprintf('value of the integral is %g\n', mean(h(X, Y)));
+        fprintf('value of the integral is %g\n', mean(f(X, Y)));
     case 8
         n = 10000;
         X = zeros(n, 1);

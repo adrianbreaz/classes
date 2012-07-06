@@ -18,8 +18,8 @@ function [X, Y] = acceptreject(rejected, randg, domain, n)
     %
     % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
-    X = rand(n, 1);
-    Y = rand(n, 1);
+    X = zeros(n, 1);
+    Y = zeros(n, 1);
 
     xa = domain(1);
     xb = domain(2);
