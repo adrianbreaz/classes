@@ -96,6 +96,7 @@ switch exercise
 
         reject_func = @(x, y) f(x) < y;
         [X, Y] = acceptreject(reject_func, @(x) x, [a b c d], n);
+
         Z = linspace(0, 1, 100);
 
         hold on;
@@ -172,30 +173,25 @@ switch exercise
         % max of q/p
         c = 3/2;
 
-        Z = zeros(n, 1);
+        % generate indexes of the regions with the required probabilities.
+        reject_func = @(x, y) q(x) <= (c * p * y);
+        randg = @(x) randi(4);
+        Z= acceptreject(reject_func, randg, [0 1 0 1], n);
 
-        for i = 1:n
-            k = randi(4);
-            U = rand();
+        % generate the required number of points in each region.
+        X = [];
+        Y = [];
+        for i = 1:4
+            % get number of points to be added to region i
+            ncoeff = length(find(Z == i));
 
-            % pick a region
-            while q(k) <= (U * c * p)
-                k = randi(4);
-                U = rand();
-            end
+            % generate the points
+            reject_func = @(x, y) y > (a1(i) * x + a2(i));
+            [X1, Y1] = acceptreject(reject_func, @(x) x, [xa(i) xb(i) ya(i) yb(i)], ncoeff);
 
-            x = xa(k) + (xb(k) - xa(k)) * rand();
-            y = ya(k) + (yb(k) - ya(k)) * rand();
-
-            % pick a point in the region
-            while y > (a1(k) * x + a2(k))
-                x = xa(k) + (xb(k) - xa(k)) * rand();
-                y = ya(k) + (yb(k) - ya(k)) * rand();
-            end
-
-            X(i) = x;
-            Y(i) = y;
-            Z(i) = k;
+            % add to the final vectors.
+            X = vertcat(X, X1);
+            Y = vertcat(Y, Y1);
         end
 
         subplot(2, 1, 1)
