@@ -29,16 +29,13 @@ switch exercise
         % g(x) = lambda * exp(-lambda * x) and the best lambda is:
         lambda = 1;
 
-        % the required functions
-        cdfexp = @(x, y) y * lambda * exp(-lambda * x);         % g
-        icdfexp = @(x) -log(1 - x)/ lambda;                     % g^-1
-        cdfnorm = @(x, y) sqrt(pi/2) * exp(-x^2/2);             % f
-
         % the required c (minimizes f/g)
         c = sqrt(2 / pi) * exp(lambda^2 / 2) / lambda;
 
         % get an array of normally distributed variables on [0, inf]
-        X = acceptreject(cdfnorm, cdfexp, icdfexp, c, [0 1 0 1], n);
+        reject_func = @(x, y) normcdf(x) < c * y * expcdf(x, lambda);
+        icdfexp = @(x) expinv(x, lambda);
+        X = acceptreject(reject_func, icdfexp, [0 1 0 1], n);
 
         % with a probability of 0.5 make it symmetric
         X = (-1).^(randi([0, 1], n, 1)) .* X;
@@ -53,11 +50,8 @@ switch exercise
         hold off
     case 3
         % Generate (X, Y) uniformly on a square [0, 1]x[0, 1]
-        f = @(x, y) 2;
-        g = @(x, y) x + y;
-        grand = @(x) x;
-
-        [X, Y] = acceptreject(f, g, grand, 1, [0 1 0 1], n);
+        reject_func = @(x, y) (x + y) > 2
+        [X, Y] = acceptreject(reject_func, @(x) x, [0 1 0 1], n);
 
         hold on;
         plot(X, Y, 'r*');
@@ -65,11 +59,8 @@ switch exercise
         hold off;
     case 4
         % Generate (X, Y) uniformly on a triangle (0, 0), (1, 0), (0, 1)
-        f = @(x, y) 1;
-        g = @(x, y) x + y;
-        grand = @(x) x;
-
-        [X, Y] = acceptreject(f, g, grand, 1, [0 1 0 1], n);
+        reject_func = @(x, y) (x + y) > 1;
+        [X, Y] = acceptreject(reject_func, @(x) x, [0 1 0 1], n);
 
         hold on;
         plot(X, Y, 'r*');
@@ -82,11 +73,8 @@ switch exercise
         b = -1;
         r = 1;      % radius
 
-        g = @(x, y) x.^2 + y.^2;
-        f = @(x, y) r;
-        grand = @(x) x;
-
-        [X, Y] = acceptreject(f, g, grand, 1, [a b a b], n);
+        reject_func = @(x, y) x.^2 + y.^2 > r;
+        [X, Y] = acceptreject(reject_func, @(x) x, [a b a b], n);
 
         hold on;
         plot(X, Y, 'r*');
@@ -95,10 +83,8 @@ switch exercise
     case 6
         % Generate (X, Y) uniformly in the set:
         %   D_f = {(x, y) \in R^2: 0 <= y <= f(x)}
-        % for a given f.
-        f = @(x, y) 3 * x.^2;
-        g = @(x, y) y;
-        grand = @(x) x;
+        % for a given f(x) = 3 * x^2;
+        f = @(x) 3 * x.^2;
 
         % limits of x
         a = 1;
@@ -108,26 +94,25 @@ switch exercise
         c = 3;
         d = 0;
 
-        [X, Y] = acceptreject(f, g, grand, 1, [a b c d], n);
+        reject_func = @(x, y) f(x) < y;
+        [X, Y] = acceptreject(reject_func, @(x) x, [a b c d], n);
         Z = linspace(0, 1, 100);
 
         hold on;
         plot(X, Y, 'r*');
-        plot(Z, f(Z, 0), 'LineWidth', 3);   % draw the function
+        plot(Z, f(Z), 'LineWidth', 3);   % draw the function
         hold off;
      case 7
         % Generate X with the density f.
         f = @(x, y) 2 * sqrt(1 - x.^2) / pi;
-        g = @(x, y) y * 0.5;
-        grand = @(x) x;
-
         c =  4/pi;
 
         % limits of x
         a = 1;
         b = -1;
 
-        [X, Y] = acceptreject(f, g, grand, c, [a b 0 1], n);
+        reject_func = @(x, y) f(x) < c * y.^2 / 2;
+        [X, Y] = acceptreject(reject_func, @(x) x, [a b 0 1], n);
 
         subplot(2, 1, 1)
         hist(X, 20);
@@ -139,13 +124,11 @@ switch exercise
         %              1/150    if k is odd
         % for k in {1, ..., 100}.
         n = 10000;
+        f = @(x, y) (1 + mod(x + 1, 2)) / 150;
         c = 4/3;
 
-        f = @(x, y) (1 + mod(x + 1, 2)) / 150;     % the PDF
-        g = @(x, y) y * 1/100;
-        grand = @(x) round(99 * x + 1);
-
-        X = acceptreject(f, g, grand, c, [0 1 0 1], n);
+        reject_func = @(x, y) f(x) < c * y / 100;
+        X = acceptreject(reject_func, @(x) round(99 * x + 1), [0 1 0 1], n);
 
         hist(X, 100);
     case 10
