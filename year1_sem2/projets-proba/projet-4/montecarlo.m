@@ -1,4 +1,4 @@
-function [I] = montecarlo(f, rejected, randg, domain, n)
+function [I, varf] = montecarlo(f, rejected, randg, domain, n)
     % Compute the integral of a given function using the Monte Carlo method.
     %
     % Arguments:
@@ -10,6 +10,7 @@ function [I] = montecarlo(f, rejected, randg, domain, n)
     %
     % Returns:
     %   - I           (double): approximated value of the integral.
+    %   - varf        (double): the variance of the variable.
     %
     % Copyleft Alexandru Fikl <alexfikl@gmail.com> (c) 2012
 
@@ -20,3 +21,4 @@ function [I] = montecarlo(f, rejected, randg, domain, n)
 
     [X, Y] = acceptreject(rejected, randg, domain, n);
     I = mean(f(X, Y));
+    varf = var(f(X, Y));
