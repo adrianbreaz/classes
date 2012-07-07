@@ -85,18 +85,15 @@ switch exercise
         % First integral
         f = @(x, y) 16 ./ (y.^2 + cos(x).^2);
 
-        reject_func = @(x, y) 0;
-        [X, Y] = acceptreject(reject_func, @(x) x, [0 2 2 10], n);
+        [X, Y] = acceptreject(@(x, y) 0, @(x) x, [0 2 2 10], n);
 
         fprintf('value of the first integral is %g.\n', mean(f(X, Y)));
 
         % Second integral
-        % FIXME: should give 0.26...
-        g = @(x, y) 1 ./ (2 * (Y + cos(X .* Y)));
+        g = @(x, y) 1 ./ (2 * (y + cos(x .* y)));
 
-        reject_func = @(x, y) 0;
-        icdfexp = @(x) -log(1 - x) / 2;
-        [X, Y] = acceptreject(reject_func, icdfexp, [0 1 1 2], n);
+        icdfexp = @(u) -log(1 - u) / 2;
+        [X, Y] = acceptreject(@(x, y) 0, icdfexp, [0 1 1 2], n);
         fprintf('value of the second integral is %g.\n', mean(g(X, Y)));
     case 7
         % Compute the integral of e^{(x - y) / (x + y)} on the domain:
@@ -110,36 +107,19 @@ switch exercise
 
         fprintf('value of the integral is %g\n', mean(f(X, Y)));
     case 8
-        n = 10000;
-        X = zeros(n, 1);
-        Y = zeros(n, 1);
+        n = 1000;
 
         fprintf('Proposed formula: pi / (5 * a * b).\n');
+        fprintf('%10s%10s%10s%10s\n', 'a', 'b', 'Approx', 'Exact');
         for v = [1 1; 2 1; 0.5 1; 1 2; 1 0.5; 2 2; 0.5 0.5]'
             a = v(1);
             b = v(2);
-            f = @(x, y) x.^2 / a^2 + y.^2 / b^2;
-            g = @(x, y) 1 ./ ( pi * a * b * sqrt(1 - x.^2 / a^2 - y.^2 / b^2));
-            xa = -a;
-            xb = a;
-            ya = -b;
-            yb = b;
 
-            for i = 1:n
-                x = xa + (xb - xa) * rand();
-                y = ya + (yb - ya) * rand();
+            f = @(x, y) 1 ./ ( pi * a * b * sqrt(1 - x.^2 / a^2 - y.^2 / b^2));
+            reject_func = @(x, y) (x.^2 / a^2 + y.^2 / b^2) > 1;
+            [X, Y] = acceptreject(reject_func, @(x) x, [-a a -b b], n);
 
-                while f(x, y) > 1
-                    x = xa + (xb - xa) * rand();
-                    y = ya + (yb - ya) * rand();
-                end
-
-                X(i) = x;
-                Y(i) = y;
-            end
-
-            fprintf('=== (a, b) = (%.3g, %.3g) ===\n', a, b);
-            fprintf('integral %.5g | exact = %.5g\n', mean(g(X, Y)), pi / (5 * a * b));
+            fprintf('%10g%10g%10.5g%10.5g\n', a, b, mean(f(X, Y)), pi / (5 * a * b));
         end
     otherwise
         fprintf('Wrong exercise number.\n');
