@@ -1,6 +1,6 @@
 clear all;
 close all;
-addpath('../projet-3');
+addpath('../functions');
 
 % Project 4: Monte Carlo and Confidence Intervals.
 %

@@ -1,7 +1,6 @@
 clear all;
 close all;
-addpath('../projet-4');
-addpath('../projet-3');
+addpath('../functions');
 
 % Project 5: Variance reduction.
 %
