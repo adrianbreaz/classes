@@ -8,7 +8,7 @@ addpath('../functions');
 %   Alexandru Fikl
 %   Adrian Breaz
 %
-% Description: we try to make the variance of our sample using different methods.
+% Description: we try to make the variance of our sample smaller using different methods.
 % For example for a U[0, 1], Var[(g(U) + g(1 - U)) / 2] < Var[g(U)]. By reducing
 % the variance we also decrease the approximation error.
 
@@ -63,7 +63,7 @@ switch exercise
         fprintf('3. Monte Carlo %g.\n', I);
         fprintf('   Variance: %g\n', varf);
     case 41
-        % We want to estimate p = P(X >= 2) where X ~ Cauchy(0, 1)
+        % We want to estimate p = P(X >= 2) where X ~ Cauchy(0, 1).
         % First try: p = E[1_{X >= 2}]
         icdf1 = @(u) tan(pi * (u - 0.5));
         f = @(x, y) x >= 2;
